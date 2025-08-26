@@ -1,0 +1,7 @@
+{
+    "C_Cpp.default.compileCommands": "/workspaces/limine-meson-c-kernel-starter/builddir/compile_commands.json",
+    "C_Cpp.default.configurationProvider": "mesonbuild.mesonbuild",
+    "files.associations": {
+        "kmain.h": "c"
+    }
+}
