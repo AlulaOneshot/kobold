@@ -8,7 +8,8 @@ else
 fi
 echo >> ~/.bashrc
 echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ~/.bashrc
+source ~/.bashrc
 brew install x86_64-elf-gcc
 brew install aarch64-elf-gcc
 brew install riscv64-elf-gcc
-echo "Environment Setup Complete. Restart your terminal or run 'source ~/.bashrc' to update your PATH."
+echo "Environment Setup Complete."

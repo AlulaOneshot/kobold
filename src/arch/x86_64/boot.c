@@ -1,5 +1,7 @@
 #include <kmain.h>
 #include <limine.h>
+#include <string.h>
+#include <stdbool.h>
 
 __attribute__((used, section(".limine_requests")))
 static volatile LIMINE_BASE_REVISION(3);

@@ -15,6 +15,9 @@ if target_arch not in supported_archs
     error('Unsupported architecture: ' + target_arch)
 endif
 
+libk_sp = subproject('libk')
+libk_dep = libk_sp.get_variable('libk_dep')
+
 message('Building for architecture: @0@'.format(target_arch))
 
 arch_configs = {
@@ -66,7 +69,6 @@ defines = config['defines'] + [
 includes = include_directories([
   'res/include',
   'res/include/arch/@0@'.format(target_arch),
-  'res/include/arch/@0@/stdlib'.format(target_arch),
   ])
 
 common_src = [
@@ -76,7 +78,8 @@ common_src = [
 arch_src = {
   'x86_64': [
     'src/arch/x86_64/boot.c',
-    'src/arch/x86_64/utilities/khalt.c'
+    'src/arch/x86_64/utilities/khalt.c',
+    'src/arch/x86_64/cpu/cpuid.c'
   ],
   'aarch64': [
     'src/arch/aarch64/boot.c',
@@ -92,12 +95,15 @@ sources = common_src + arch_src[target_arch]
 
 linker_ld = 'res/linker/linker-@0@.ld'.format(target_arch)
 
+
+
 kobold = executable('kernel',
   sources: sources,
   include_directories: includes,
   c_args: cflags + defines,
   link_args: ldflags + ['-T', meson.current_source_dir() / linker_ld],
-  install: false
+  install: false,
+  dependencies: [libk_dep]
 )
 
 
@@ -109,3 +115,4 @@ iso_img = custom_target('image.iso',
   ],
   build_by_default: true
 )
+

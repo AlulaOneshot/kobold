@@ -1,8 +1,8 @@
-# Limine Meson C Starter Kernel
+# The Kobold Kernel
 
 ## Setup
 
-To setup your environment, run the following commands. These are REQUIRED or your kernel may not build correctly. If you are not familiar with the terminal or dont have one, quit now. You aren't ready for OSDev.
+To setup the build environment, run the following commands. These are REQUIRED or the kernel may not build correctly. If you are not familiar with the terminal or dont have one, quit now.
 
 ```bash
 chmod +x scripts/setupenv.sh
@@ -11,8 +11,8 @@ chmod +x scripts/setupenv.sh
 
 ## Build
 
-Now that your environment is setup, you can build and run your kernel.
-First, choose the architecture you want to build for. This template supports x86_64, aarch64, and riscv64. Once you have chosen your target architecture, you need to get the name of the cross file for you build. The cross file tells meson what tools to use to build your kernel. All cross files are located in the `res/cross-files/` folder. The cross file for x86_64, for example, would be `res/cross-files/x86_64-gcc.ini`.
+Now that your environment is setup, you can build and run kobold.
+First, choose the architecture you want to build for. This template supports x86_64, aarch64, and riscv64. Once you have chosen your target architecture, you need to get the name of the cross file for you build. The cross file tells meson what tools to use to build the kernel. All cross files are located in the `res/cross-files/` folder. The cross file for x86_64, for example, would be `res/cross-files/x86_64-gcc.ini`.
 
 To setup a meson build directory, run the following command.
 
@@ -20,7 +20,7 @@ To setup a meson build directory, run the following command.
 meson setup builddir --cross-file=res/cross-files/{your_target_arch}-gcc.ini
 ```
 
-Now, you should see a directory named builddir. This is where meson will place your built kernel and disk image. To build your kernel and a disk image, run the following command.
+Now, you should see a directory named builddir. This is where meson will place the built kernel and disk image. To build your kernel and a disk image, run the following command.
 
 ```bash
 meson compile -C builddir
