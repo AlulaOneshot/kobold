@@ -72,14 +72,18 @@ includes = include_directories([
   ])
 
 common_src = [
-  'src/kmain.c'
+  'src/kmain.c',
+  'src/log.c'
 ]
 
 arch_src = {
   'x86_64': [
     'src/arch/x86_64/boot.c',
     'src/arch/x86_64/utilities/khalt.c',
-    'src/arch/x86_64/cpu/cpuid.c'
+    'src/arch/x86_64/cpu/cpuid.c',
+    'src/arch/x86_64/drivers/serial.c',
+    'src/arch/x86_64/cpu/idt.c',
+    'src/arch/x86_64/cpu/idt.s',
   ],
   'aarch64': [
     'src/arch/aarch64/boot.c',
@@ -106,8 +110,7 @@ kobold = executable('kernel',
   dependencies: [libk_dep]
 )
 
-
-iso_img = custom_target('image.iso',
+custom_target('image.iso',
   output: 'image.iso',
   command: [
     meson.project_source_root() / 'scripts/make_image.py',
@@ -115,4 +118,3 @@ iso_img = custom_target('image.iso',
   ],
   build_by_default: true
 )
-

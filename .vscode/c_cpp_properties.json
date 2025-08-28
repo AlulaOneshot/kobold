@@ -11,7 +11,8 @@
             "intelliSenseMode": "linux-gcc-x64",
             "configurationProvider": "mesonbuild.mesonbuild",
             "compilerArgs": [
-                "res/include"
+                "res/include",
+                "subprojects/libk"
             ],
             "compilerPath": "/home/linuxbrew/.linuxbrew/bin/x86_64-elf-gcc"
         }

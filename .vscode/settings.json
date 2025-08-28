@@ -3,6 +3,9 @@
     "C_Cpp.default.configurationProvider": "mesonbuild.mesonbuild",
     "files.associations": {
         "kmain.h": "c",
-        "cpu.h": "c"
+        "cpu.h": "c",
+        "stdint.h": "c",
+        "serial.h": "c",
+        "stdarg.h": "c"
     }
 }
