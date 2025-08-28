@@ -30,7 +30,7 @@ with tempfile.TemporaryDirectory() as iso_root:
     os.makedirs(os.path.join(iso_root, "boot"), exist_ok=True)
     shutil.copy(kernel, os.path.join(iso_root, "boot", "kernel"))
     os.makedirs(os.path.join(iso_root, os.path.join("boot", "limine")), exist_ok=True)
-    shutil.copy(cfg, os.path.join(iso_root, "boot", "limine", "limine.cfg"))
+    shutil.copy(cfg, os.path.join(iso_root, "boot", "limine", "limine.conf"))
     os.makedirs(os.path.join(iso_root, "EFI", "BOOT"), exist_ok=True)
     if arch == "x86_64":
         shutil.copy(os.path.join(limine_dir, "limine-bios.sys"), os.path.join(iso_root, "boot", "limine", "limine-bios.sys"))
