@@ -26,19 +26,19 @@ Now, you should see a directory named builddir. This is where meson will place t
 meson compile -C builddir
 ```
 
-To run your image, you must run a different command depending on what architecture you built it for. If you are running in a graphical environment (i.e. KDE Plasma, Windows, MacOS, GNOME), you can omit the `-nographic`. This was added because I created this template in github codespaces.
+To run your image, you must run a different command depending on what architecture you built it for. If you are running in a graphical environment (i.e. KDE Plasma, Windows, MacOS, GNOME), you can omit the `-display none`. This was added because I created this template in github codespaces.
 
 ### x86_64
 ```bash
-qemu-system-x86_64 -M q35 -cdrom builddir/image.iso -nographic
+qemu-system-x86_64 -M q35 -cdrom builddir/image.iso -display none -serial stdio
 ```
 
 ### aarch64
 ```bash
-qemu-system-aarch64 -M virt -cpu cortex-a72 -device qemu-xhci -device usb-kbd -cdrom builddir/image.iso -nographic
+qemu-system-aarch64 -M virt -cpu cortex-a72 -device qemu-xhci -device usb-kbd -cdrom builddir/image.iso -display none
 ```
 
 ### riscv64
 ```bash
-qemu-system-riscv64 -M virt -cpu rv64 -device qemu-xhci -device usb-kbd -cdrom builddir/image.iso -nographic
+qemu-system-riscv64 -M virt -cpu rv64 -device qemu-xhci -device usb-kbd -cdrom builddir/image.iso -display none
 ```
