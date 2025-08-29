@@ -77,6 +77,8 @@ common_src = [
 arch_src = {
   'x86_64': [
     'src/arch/x86_64/boot.c',
+    'src/arch/x86_64/cpu/gdt.c',
+    'src/arch/x86_64/cpu/gdt.s',
   ],
   'aarch64': [
     'src/arch/aarch64/boot.c',
