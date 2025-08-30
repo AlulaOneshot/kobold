@@ -9,7 +9,7 @@ else
     echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ~/.bashrc
     source ~/.bashrc
 fi
-brew install x86_64-elf-gcc
-brew install aarch64-elf-gcc
-brew install riscv64-elf-gcc
+/home/linuxbrew/.linuxbrew/bin/brew install x86_64-elf-gcc
+/home/linuxbrew/.linuxbrew/bin/brew install aarch64-elf-gcc
+/home/linuxbrew/.linuxbrew/bin/brew install riscv64-elf-gcc
 echo "Environment Setup Complete."

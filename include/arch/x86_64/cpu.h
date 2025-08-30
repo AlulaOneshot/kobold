@@ -90,6 +90,23 @@ void reloadGDT();
 
 // IDT Stuff
 
+#define IDT_NO_IST 0b000
+#define IDT_IST_1 0b001
+#define IDT_IST_2 0b010
+#define IDT_IST_3 0b011
+#define IDT_IST_4 0b100
+#define IDT_IST_5 0b101
+#define IDT_IST_6 0b110
+#define IDT_IST_7 0b111
+#define IDT_TYPE_INTERRUPT_GATE 0b1110
+#define IDT_TYPE_TRAP_GATE 0b1111
+#define IDT_TYPE_DPL0 (0b00 << 5)
+#define IDT_TYPE_DPL1 (0b01 << 5)
+#define IDT_TYPE_DPL2 (0b10 << 5)
+#define IDT_TYPE_DPL3 (0b11 << 5)
+#define IDT_PRESENT (0b1 << 7)
+
+
 typedef struct {
     uint16_t size;
     uint64_t offset;
@@ -105,6 +122,67 @@ typedef struct {
     uint32_t reserved; // Reserved
 } __attribute__((packed)) idt_entry_t;
 
+typedef struct {
+  uint64_t ds; // & es
 
+  uint64_t r15;
+  uint64_t r14;
+  uint64_t r13;
+  uint64_t r12;
+  uint64_t r11;
+  uint64_t r10;
+  uint64_t r9;
+  uint64_t r8;
+  uint64_t rbp;
+  uint64_t rdi;
+  uint64_t rsi;
+  uint64_t rdx;
+  uint64_t rcx;
+  uint64_t rbx;
+  uint64_t rax;
+
+  uint64_t interrupt;
+  uint64_t error;
+
+  uint64_t rip;
+  uint64_t cs;
+  uint64_t rflags;
+  uint64_t rsp;
+  uint64_t ss;
+} isr_registers_t;
+
+void initIDT();
+void setIDTEntry(uint8_t vector, void (*isr), uint16_t selector, uint8_t ist, uint8_t type_attr);
+
+// CPU instructions
+
+static inline void outb(uint16_t port, uint8_t val)
+{
+    __asm__ volatile ( "outb %b0, %w1" : : "a"(val), "Nd"(port) : "memory");
+}
+
+static inline uint8_t inb(uint16_t port)
+{
+    uint8_t ret;
+    __asm__ volatile ( "inb %w1, %b0"
+                   : "=a"(ret)
+                   : "Nd"(port)
+                   : "memory");
+    return ret;
+}
+
+static inline void ioWait(void)
+{
+    outb(0x80, 0);
+}
+
+static inline bool areInterruptsEnabled()
+{
+    unsigned long flags;
+    asm volatile ( "pushf\n\t"
+                   "pop %0"
+                   : "=g"(flags) );
+    return flags & (1 << 9);
+}
 
 #endif

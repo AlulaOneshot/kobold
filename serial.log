@@ -1,0 +1,14 @@
+Serial Initialized
+Limine Base Protocol Supported
+Got Higher Half Direct Map of 0xffff800000000000
+Initializing GDT
+GDT Initialized
+Initializing IDT
+IDT Initialized
+Initializing PMM
+Got 16 memory map entries
+Highest address: 0x1ff63000
+Bitmap size: 16384 bytes (4 pages)
+Placed bitmap at 0x52000
+Found 130706 free pages
+PMM Initialized

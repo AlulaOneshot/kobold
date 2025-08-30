@@ -7,6 +7,8 @@
         "stdint.h": "c",
         "serial.h": "c",
         "stdarg.h": "c",
-        "cstdint": "c"
+        "cstdint": "c",
+        "compare": "c",
+        "printf.h": "c"
     }
 }
