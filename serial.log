@@ -1,14 +1,25 @@
 Serial Initialized
 Limine Base Protocol Supported
-Got Higher Half Direct Map of 0xffff800000000000
+Got Higher Half Direct Map of FFFF800000000000
 Initializing GDT
 GDT Initialized
 Initializing IDT
 IDT Initialized
 Initializing PMM
 Got 16 memory map entries
-Highest address: 0x1ff63000
+Highest address: 0x1ff62000
 Bitmap size: 16384 bytes (4 pages)
 Placed bitmap at 0x52000
-Found 130706 free pages
+Found 130700 free pages
 PMM Initialized
+Initializing VMM
+Mapping Limine from FFFFFFFF80000000 to FFFFFFFF80001000
+Mapping Kernel Text from FFFFFFFF80001000 to FFFFFFFF80005000
+Mapping Kernel Rodata from FFFFFFFF80005000 to FFFFFFFF80006000
+Mapping Kernel Data from FFFFFFFF80006000 to FFFFFFFF80008000
+Mapping Bitmap from FFFF800000052000 to FFFF800000056000
+Loading new Pagemap at FFFF800000056000
+VMM Initialized
+I have become memory managed, destroyer of worlds.
+Hello, World! 24
+Freed memory!

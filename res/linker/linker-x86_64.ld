@@ -25,23 +25,41 @@ SECTIONS
 
     /* Define a section to contain the Limine requests and assign it to its own PHDR */
     .limine_requests : {
+        /* Symbol for locating sections during VMM mapping. Required */
+        limineStart = .;
+
         KEEP(*(.limine_requests_start))
         KEEP(*(.limine_requests))
         KEEP(*(.limine_requests_end))
+
+        /* Symbol for locating sections during VMM mapping. Required */
+        limineEnd = .;
     } :limine_requests
 
     /* Move to the next memory page for .text */
     . = ALIGN(CONSTANT(MAXPAGESIZE));
 
     .text : {
+        /* Symbol for locating sections during VMM mapping. Required */
+        textStart = .;
+
         *(.text .text.*)
+
+        /* Symbol for locating sections during VMM mapping. Required */
+        textEnd = .;
     } :text
 
     /* Move to the next memory page for .rodata */
     . = ALIGN(CONSTANT(MAXPAGESIZE));
 
     .rodata : {
+        /* Symbol for locating sections during VMM mapping. Required */
+        rodataStart = .;
+
         *(.rodata .rodata.*)
+
+        /* Symbol for locating sections during VMM mapping. Required */
+        rodataEnd = .;
     } :rodata
 
     /* Add a .note.gnu.build-id output section in case a build ID flag is added to the */
@@ -54,6 +72,9 @@ SECTIONS
     . = ALIGN(CONSTANT(MAXPAGESIZE));
 
     .data : {
+        /* Symbol for locating sections during VMM mapping. Required */
+        dataStart = .;
+
         *(.data .data.*)
     } :data
 
@@ -64,6 +85,9 @@ SECTIONS
     .bss : {
         *(.bss .bss.*)
         *(COMMON)
+
+        /* Symbol for locating sections during VMM mapping. Required */
+        dataEnd = .;
     } :data
 
     /* Discard .note.* and .eh_frame* since they may cause issues on some hosts. */

@@ -25,6 +25,12 @@ static volatile struct limine_hhdm_request hhdm_request = {
     .revision = 0
 };
 
+__attribute__((used, section(".limine_requests")))
+static volatile struct limine_kernel_address_request kernel_address_request = {
+    .id = LIMINE_KERNEL_ADDRESS_REQUEST,
+    .revision = 0
+};
+
 __attribute__((used, section(".limine_requests_end")))
 static volatile LIMINE_REQUESTS_END_MARKER;
 
@@ -38,7 +44,7 @@ void _start() {
         while (1);
     }
 
-    printf("Got Higher Half Direct Map of 0x%lx\n", hhdm_request.response->offset);
+    printf("Got Higher Half Direct Map of %p\n", hhdm_request.response->offset);
 
     printf("Initializing GDT\n");
     initGDT();
@@ -49,6 +55,11 @@ void _start() {
     printf("Initializing PMM\n");
     initPMM(memmap_request.response, hhdm_request.response->offset);
     printf("PMM Initialized\n");
+    printf("Initializing VMM\n");
+    initVMM(memmap_request.response, kernel_address_request.response);
+    printf("VMM Initialized\n");
+
+    printf("I have become memory managed, destroyer of worlds.\n");
 
     kmain();
 }

@@ -84,6 +84,7 @@ arch_src = {
     'src/arch/x86_64/serial.c',
     'src/arch/x86_64/printf.c',
     'src/arch/x86_64/mm/pmm.c',
+    'src/arch/x86_64/mm/vmm.c',
   ],
   'aarch64': [
     'src/arch/aarch64/boot.c',

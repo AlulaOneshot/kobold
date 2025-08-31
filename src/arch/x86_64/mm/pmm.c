@@ -92,6 +92,15 @@ void initPMM(struct limine_memmap_response *memmapResponse, uint64_t hhdm) {
     }
 
     printf("Found %lu free pages\n", freePages);
+
+    if ((freePages * 4096) / (1024 * 1024) < 64) {
+        printf("Error: Less than 64MB of RAM detected\n");
+        printf("Kobold has been shown to fail to boot with less than 64MB of ram\n");
+        printf("Hanging");
+        while (1) {
+            asm volatile("hlt");
+        }
+    }
 }
 
 /// @brief Returns a pointer to a block of physical memory of at least size bytes. Returns NULL on failure.
