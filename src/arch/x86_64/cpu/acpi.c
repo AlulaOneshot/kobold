@@ -43,9 +43,40 @@ void uacpi_kernel_pci_device_close(uacpi_handle handle) {
 uacpi_status uacpi_kernel_pci_read8(uacpi_handle device, uacpi_size offset, uacpi_u8 *value) {
     uacpi_pci_address *address = (uacpi_pci_address *)device;
     
-    *value = ConfigReadWord(address->bus, address->device, address->function,
+    *value = configReadWordPCI(address->bus, address->device, address->function,
                           offset & ~1);
     *value = (*value >> ((offset & 1) * 8)) & 0xFF;
+}
+
+uacpi_status uacpi_kernel_pci_read16(uacpi_handle device, uacpi_size offset, uacpi_u16 *value) {
+    uacpi_pci_address *address = (uacpi_pci_address *)device;
+
+    *value = configReadWordPCI(address->bus, address->device, address->function,
+                          offset & ~1);
+    *value = (*value >> ((offset & 1) * 8));
+    return UACPI_STATUS_OK;
+}
+
+uacpi_status uacpi_kernel_pci_read32(uacpi_handle device, uacpi_size offset, uacpi_u32 *value) {
+    uacpi_pci_address *address = (uacpi_pci_address *)device;
+
+    *value = configReadWordPCI(address->bus, address->device, address->function,
+                          offset);
+    *value |= ((uacpi_u64)configReadWordPCI(address->bus, address->device,
+                                       address->function, offset + 2)
+             << 16);
+
+    return UACPI_STATUS_OK;
+}
+
+uacpi_status uacpi_kernel_pci_write8(uacpi_handle device, uacpi_size offset, uacpi_u8 value) {
+
+}
+uacpi_status uacpi_kernel_pci_write16(uacpi_handle device, uacpi_size offset, uacpi_u16 value) {
+
+}
+uacpi_status uacpi_kernel_pci_write32(uacpi_handle device, uacpi_size offset, uacpi_u32 value) {
+    
 }
 
 // End UACPI Glue

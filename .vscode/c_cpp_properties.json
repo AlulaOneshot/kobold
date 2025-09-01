@@ -4,7 +4,8 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/include",
-                "${workspaceFolder}/subprojects/libk/include/x86_64/include"
+                "${workspaceFolder}/subprojects/libk/include/x86_64/include",
+                "${workspaceFolder}/subprojects/uacpi/include"
             ],
             "defines": [],
             "cStandard": "c17",
