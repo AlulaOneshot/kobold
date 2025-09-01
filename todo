@@ -1,4 +1,2 @@
-GDT(x86_64)
-Stack Init(All)
-Paging(all)
-Interrupt Controller(All)
+Page Map Level 5 If supported(x86_64)
+Spinlock in Physical Memory Manager Along with many other areas (x86_64)

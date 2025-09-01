@@ -10,6 +10,8 @@
     Includes:
         GDT
         IDT
+        CPU instructions
+        ACPI
 */
 
 // GDT Stuff
@@ -31,6 +33,7 @@
 #define FLAGS_32_BIT (1 << 6) // 32-bit segment (0 for 64-bit code segment).
 #define FLAGS_GRANULARITY (1 << 7) // Limit scaled by 4K when set.
 
+/// @brief A GDT entry.
 typedef struct {
     uint16_t limit0; // Limit 0:15
     uint16_t base0; // Base 0:15
@@ -40,6 +43,7 @@ typedef struct {
     uint8_t base2; // Base 24:31
 } __attribute__((packed)) gdt_entry_t;
 
+/// @brief A TSS descriptor entry.
 typedef struct {
     uint16_t limit0; // Limit 0:15
     uint16_t base0; // Base 0:15
@@ -51,6 +55,7 @@ typedef struct {
     uint32_t reserved;
 } __attribute__((packed)) tss_descriptor_entry_t;
 
+/// @brief A Task State Segment (TSS).
 typedef struct {
     uint32_t reserved0;
     uint64_t rsp0;
@@ -69,6 +74,7 @@ typedef struct {
     uint16_t io_map_base;
 } __attribute__((packed)) tss_t;
 
+/// @brief The GDT itself.
 typedef struct {
     gdt_entry_t null;
     gdt_entry_t kernel_code;
@@ -78,6 +84,7 @@ typedef struct {
     tss_descriptor_entry_t tss_desc;
 } __attribute__((packed)) gdt_t;
 
+/// @brief A pointer to the GDT, for use with the lgdt instruction.
 typedef struct {
     uint16_t limit;
     uint64_t base;
@@ -85,7 +92,9 @@ typedef struct {
 
 #define makeSegmentSelector(index, table, rpl) (uint16_t)(((uint16_t)index << 3) | ((bool)(table & 0b1) << 2) | ((uint8_t)(rpl & 0b11)))
 
+/// @brief Initialize the TSS and the GDT.
 void initGDT();
+/// @brief Load the GDT into the CPU.
 void reloadGDT();
 
 // IDT Stuff
@@ -106,12 +115,13 @@ void reloadGDT();
 #define IDT_TYPE_DPL3 (0b11 << 5)
 #define IDT_PRESENT (0b1 << 7)
 
-
+/// @brief A pointer to the IDT, for use with the lidt instruction.
 typedef struct {
     uint16_t size;
     uint64_t offset;
 } __attribute__((packed)) idt_descriptor_t;
 
+/// @brief An IDT entry.
 typedef struct {
     uint16_t offset0; // Offset 0:15
     uint16_t selector; // A code segment selector in GDT or LDT
@@ -122,6 +132,7 @@ typedef struct {
     uint32_t reserved; // Reserved
 } __attribute__((packed)) idt_entry_t;
 
+/// @brief CPU register state pushed by the ISR.
 typedef struct {
   uint64_t ds; // & es
 
@@ -151,16 +162,59 @@ typedef struct {
   uint64_t ss;
 } isr_registers_t;
 
+/// @brief Initialize the IDT.
 void initIDT();
+/// @brief Set an entry in the IDT.
+/// @param vector The entry vector to set (0-255).
+/// @param isr The ISR function pointer.
+/// @param selector The segment to load into CS.
+/// @param ist The interrupt stack table to use, or 0 for none.
+/// @param type_attr The type and attributes byte.
 void setIDTEntry(uint8_t vector, void (*isr), uint16_t selector, uint8_t ist, uint8_t type_attr);
+
+// PIC Stuff
+
+#define PIC1		0x20		/* IO base address for master PIC */
+#define PIC2		0xA0		/* IO base address for slave PIC */
+#define PIC1_COMMAND	PIC1
+#define PIC1_DATA	(PIC1+1)
+#define PIC2_COMMAND	PIC2
+#define PIC2_DATA	(PIC2+1)
+
+#define ICW1_ICW4	0b1		/* Indicates that ICW4 will be present */
+#define ICW1_SINGLE	0b10		/* Single (cascade) mode */
+#define ICW1_INTERVAL4	0b100		/* Call address interval 4 (8) */
+#define ICW1_LEVEL	0b1000		/* Level triggered (edge) mode */
+#define ICW1_INIT	0b10000		/* Initialization - required! */
+
+#define ICW4_8086	0b1		/* 8086/88 (MCS-80/85) mode */
+#define ICW4_AUTO	0b10		/* Auto (normal) EOI */
+#define ICW4_BUF_SLAVE	0b1000		/* Buffered mode/slave */
+#define ICW4_BUF_MASTER	0b1100		/* Buffered mode/master */
+#define ICW4_SFNM	0b10000		/* Special fully nested (not) */
+
+#define CASCADE_IRQ 2
+
+void initPIC();
+void remapPIC(int offset1, int offset2);
+void disablePIC();
+void setPICMask(uint8_t line);
+void clearPICMask(uint8_t line);
+void sendEOI(uint8_t irq);
 
 // CPU instructions
 
+/// @brief Output a byte to a port.
+/// @param port The port to output to.
+/// @param val The byte to output.
 static inline void outb(uint16_t port, uint8_t val)
 {
     __asm__ volatile ( "outb %b0, %w1" : : "a"(val), "Nd"(port) : "memory");
 }
 
+/// @brief Read a byte from a port.
+/// @param port The port to read from.
+/// @return The byte read.
 static inline uint8_t inb(uint16_t port)
 {
     uint8_t ret;
@@ -171,11 +225,38 @@ static inline uint8_t inb(uint16_t port)
     return ret;
 }
 
-static inline void ioWait(void)
+static inline void outw(uint16_t port, uint16_t value) {
+    __asm__("out %%ax, %%dx" : : "a"(value), "d"(port));
+}
+
+static inline uint16_t inw(uint16_t port)
+{
+    uint16_t ret;
+    __asm__ volatile ( "inw %w1, %w0"
+                   : "=a"(ret)
+                   : "Nd"(port)
+                   : "memory");
+    return ret;
+}
+
+static inline void outl(uint16_t port, uint32_t value) {
+  __asm__ __volatile__("outl %%eax, %%dx" : : "d"(port), "a"(value));
+}
+
+static inline uint32_t inl(uint16_t port) {
+  uint32_t ret;
+  __asm__ __volatile__("inl %%dx, %%eax" : "=a"(ret) : "d"(port));
+  return ret;
+}
+
+/// @brief Wait for an I/O operation to complete.
+static inline void ioWait()
 {
     outb(0x80, 0);
 }
 
+/// @brief Check if CPU interrupts are enabled.
+/// @return true if interrupts are enabled, false otherwise.
 static inline bool areInterruptsEnabled()
 {
     unsigned long flags;
@@ -184,5 +265,16 @@ static inline bool areInterruptsEnabled()
                    : "=g"(flags) );
     return flags & (1 << 9);
 }
+
+// PCI Stuff
+
+#define PCI_CONFIG_ADDRESS 0xCF8
+#define PCI_CONFIG_DATA 0xCFC
+
+uint16_t configReadWordPCI(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset);
+
+// ACPI Stuff
+
+void initACPI(uint64_t address);
 
 #endif

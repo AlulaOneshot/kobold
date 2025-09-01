@@ -66,9 +66,15 @@ defines = config['defines'] + [
   '-D KERNEL_VERSION="@0@"'.format(meson.project_version()),
 ]
 
-includes = include_directories([
+uacpi = subproject('uacpi')
+
+uacpi_sources = uacpi.get_variable('sources')
+
+uacpi_includes = uacpi.get_variable('includes')
+
+includes = [include_directories([
   'include',
-  ])
+  ])] + uacpi_includes
 
 common_src = [
   'src/kmain.c',
@@ -81,11 +87,13 @@ arch_src = {
     'src/arch/x86_64/cpu/gdt.s',
     'src/arch/x86_64/cpu/idt.c',
     'src/arch/x86_64/cpu/isr.s',
+    'src/arch/x86_64/cpu/acpi.c',
+    'src/arch/x86_64/cpu/pci.c',
     'src/arch/x86_64/serial.c',
     'src/arch/x86_64/printf.c',
     'src/arch/x86_64/mm/pmm.c',
     'src/arch/x86_64/mm/vmm.c',
-  ],
+  ] + uacpi_sources,
   'aarch64': [
     'src/arch/aarch64/boot.c',
   ],
@@ -97,8 +105,6 @@ arch_src = {
 sources = common_src + arch_src[target_arch]
 
 linker_ld = 'res/linker/linker-@0@.ld'.format(target_arch)
-
-
 
 kobold = executable('kernel',
   sources: sources,

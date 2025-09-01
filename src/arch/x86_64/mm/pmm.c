@@ -1,3 +1,8 @@
+/*
+    The Kobold Kernel
+    pmm.c - The physical memory manager
+*/
+
 #include <arch/x86_64/mm.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -8,20 +13,28 @@
 #include <string.h>
 
 uint8_t *bitmap;
-//TODO: Spinlock for thread safety
+/// @brief The highest addressable memory location
 uint64_t highestAddress;
-uint64_t bitmapSize; // In bytes
+uint64_t bitmapSize;
+/// @brief The number of free pages
 uint64_t freePages;
 uint64_t hhdmOffset;
 
+/// @brief Sets a bit in the bitmap
+/// @param index The index of the bit to set
 void bitmapSet(uint64_t index) {
     bitmap[index / 8] |= (1 << (index % 8));
 }
 
+/// @brief Clears a bit in the bitmap
+/// @param index The index of the bit to clear
 void bitmapClear(uint64_t index) {
     bitmap[index / 8] &= ~(1 << (index % 8));
 }
 
+/// @brief Gets a bit from the bitmap
+/// @param index The index of the bit to get
+/// @return The value of the bit
 bool bitmapGet(size_t index) {
     return bitmap[index / 8] & (1 << (index % 8));
 }

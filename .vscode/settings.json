@@ -9,7 +9,8 @@
         "stdarg.h": "c",
         "cstdint": "c",
         "compare": "c",
-        "printf.h": "c"
+        "printf.h": "c",
+        "mm.h": "c"
     },
     "mesonbuild.configureOnOpen": true
 }

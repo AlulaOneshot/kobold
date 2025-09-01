@@ -1,3 +1,6 @@
+# The Kobold Kernel
+# gdt.s - Any GDT-related Assembly code
+
 .globl loadCS
 
 loadCS: # NOTE: this does not work for ring switching

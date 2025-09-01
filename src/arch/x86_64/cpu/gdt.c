@@ -1,8 +1,17 @@
+/*
+    The Kobold Kernel
+    gdt.c - All GDT and TSS related functions.
+*/
+
 #include <arch/x86_64/cpu.h>
 
+/// @brief The GDT structure
 gdt_t gdt;
+/// @brief The TSS structure
 tss_t tss;
 
+/// @brief Set the TSS Descriptor in the GDT
+/// @param tss The TSS to point to
 void setTSS(tss_t *tss) {
     uint64_t base = (uint64_t)tss;
     uint32_t limit = sizeof(tss_t) - 1;
@@ -19,6 +28,8 @@ void setTSS(tss_t *tss) {
     };
 }
 
+/// @brief Load a code segment into the CS register. Implimented in assembly.
+/// @param segment The code segment selector to load
 extern void loadCS(uint16_t segment);
 
 void reloadGDT() {

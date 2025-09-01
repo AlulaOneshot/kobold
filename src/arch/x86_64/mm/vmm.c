@@ -1,10 +1,17 @@
-// Simple Virtual Memory Manager
+/*
+    The Kobold Kernel
+    vmm.c - The virtual memory manager
+*/
 
 #include <arch/x86_64/mm.h>
 
 pagemap_t *kernelPML4; // The kernel's PML4
 
-// Helper function to get or allocate a page table
+/// @brief Gets or allocates a page table
+/// @param parent The parent page table
+/// @param index The index in the parent table
+/// @param flags The flags to set on the new table
+/// @return The page table, or NULL on failure
 static pagemap_t *getOrAllocateTable(pagemap_t *parent, uint64_t index, uint8_t flags) {
     if (!((uint64_t)((*parent)[index]) & PAGE_PRESENT)) {
         void *page = pmAlloc(PAGE_SIZE);
@@ -17,6 +24,7 @@ static pagemap_t *getOrAllocateTable(pagemap_t *parent, uint64_t index, uint8_t 
     }
     return (pagemap_t *)(hhdmOffset + ((*parent)[index] & 0x000FFFFFFFFFF000));
 }
+
 
 bool isPageMapped(uint64_t vaddr) {
     if (!kernelPML4) return false;
@@ -43,7 +51,6 @@ bool isPageMapped(uint64_t vaddr) {
 }
 
 
-// Maps a virtual address to a physical address with given flags
 bool vmMapPage(pagemap_t *pagemap, uint64_t vaddr, uint64_t paddr, uint64_t flags) {
     uint64_t pml4Index = (vaddr >> 39) & 0x1FF;
     uint64_t pdptIndex = (vaddr >> 30) & 0x1FF;
@@ -89,11 +96,6 @@ void vmUnmapPage(pagemap_t *pagemap, uint64_t vaddr) {
 }
 
 void initVMM(struct limine_memmap_response *memmapResponse, struct limine_kernel_address_response *kernelAddressResponse) {
-    pagemap_t *liminePagemap;
-    uint64_t temp;
-    asm volatile ("mov %%cr3, %0" : "=r"(temp)); // Get the pagemap limine set at boot.
-    liminePagemap = (pagemap_t *)((temp & ~0xFFFULL) + hhdmOffset);
-
     kernelPML4 = (pagemap_t *)((uint64_t)pmAlloc(sizeof(pagemap_t)) + hhdmOffset);
     memset(kernelPML4, 0, sizeof(pagemap_t));
 
@@ -175,6 +177,9 @@ void vmLoad(pagemap_t *pml4) {
     asm volatile ("mov %0, %%cr3" :: "r"(phys & ~0xFFFULL));
 }
 
+/// @brief Find a free region of virtual memory of at least size bytes
+/// @param size The minimum size of the region
+/// @return The virtual address of the region
 static void *findFreeRegion(size_t size) {
     uint64_t currentRunStart = 0;
     uint64_t currentRunLength = 0;
@@ -195,6 +200,8 @@ static void *findFreeRegion(size_t size) {
             }
         }
     }
+
+    return NULL; // No suitable region found
 }
 
 void *vmGetPages(void *requestedAddress, size_t size) {
@@ -218,6 +225,32 @@ void *vmGetPages(void *requestedAddress, size_t size) {
     }
 
     return (void *)start;
+}
+
+void *vmMapPageRange(pagemap_t *pagemap, uint64_t paddr, size_t size) {
+    uint64_t start = ALIGN_DOWN(paddr, PAGE_SIZE);
+    uint64_t end = ALIGN_UP(paddr + size, PAGE_SIZE);
+
+    void *vaddr = findFreeRegion(end - start);
+    if (!vaddr) return NULL;
+
+    for (uint64_t addr = start; addr < end; addr += PAGE_SIZE) {
+        if (!vmMapPage(pagemap, (uint64_t)vaddr + (addr - start), addr, PAGE_PRESENT | PAGE_WRITABLE)) {
+            // Handle allocation failure (e.g., log an error)
+            return NULL;
+        }
+    }
+
+    return vaddr;
+}
+
+void vmUnmapPageRange(pagemap_t *pagemap, void *address, size_t size) {
+    uint64_t start = ALIGN_DOWN((uint64_t)address, PAGE_SIZE);
+    uint64_t end = ALIGN_UP((uint64_t)address + size, PAGE_SIZE);
+
+    for (uint64_t addr = start; addr < end; addr += PAGE_SIZE) {
+        vmUnmapPage(pagemap, addr);
+    }
 }
 
 uint64_t vmGetPhysical(pagemap_t *pagemap, uint64_t vaddr) {

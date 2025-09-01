@@ -10,16 +10,14 @@ Got 16 memory map entries
 Highest address: 0x1ff62000
 Bitmap size: 16384 bytes (4 pages)
 Placed bitmap at 0x52000
-Found 130700 free pages
+Found 130697 free pages
 PMM Initialized
 Initializing VMM
 Mapping Limine from FFFFFFFF80000000 to FFFFFFFF80001000
-Mapping Kernel Text from FFFFFFFF80001000 to FFFFFFFF80005000
-Mapping Kernel Rodata from FFFFFFFF80005000 to FFFFFFFF80006000
-Mapping Kernel Data from FFFFFFFF80006000 to FFFFFFFF80008000
+Mapping Kernel Text from FFFFFFFF80001000 to FFFFFFFF80006000
+Mapping Kernel Rodata from FFFFFFFF80006000 to FFFFFFFF80007000
+Mapping Kernel Data from FFFFFFFF80007000 to FFFFFFFF80009000
 Mapping Bitmap from FFFF800000052000 to FFFF800000056000
 Loading new Pagemap at FFFF800000056000
 VMM Initialized
 I have become memory managed, destroyer of worlds.
-Hello, World! 24
-Freed memory!
