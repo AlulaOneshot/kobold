@@ -31,12 +31,6 @@ static volatile struct limine_kernel_address_request kernel_address_request = {
     .revision = 0
 };
 
-__attribute__((used, section(".limine_requests")))
-static volatile struct limine_rsdp_request rsdp_request = {
-    .id = LIMINE_RSDP_REQUEST,
-    .revision = 0
-};
-
 __attribute__((used, section(".limine_requests_end")))
 static volatile LIMINE_REQUESTS_END_MARKER;
 
@@ -65,7 +59,7 @@ void _start() {
     initVMM(memmap_request.response, kernel_address_request.response);
     printf("VMM Initialized\n");
     printf("Initializing ACPI\n");
-    initACPI((uint64_t)rsdp_request.response->address);
+    initACPI();
     printf("ACPI Initialized\n");
 
     kmain();

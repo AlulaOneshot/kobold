@@ -278,10 +278,11 @@ static inline uint64_t rdtsc(void) {
 #define PCI_CONFIG_DATA 0xCFC
 
 uint16_t configReadWordPCI(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset);
+uint32_t configReadDoubleWordPCI(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset);
 void configWriteDoubleWordPCI(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset, uint32_t conf);
 
 // ACPI Stuff
 
-void initACPI(uint64_t address);
+void initACPI();
 
 #endif

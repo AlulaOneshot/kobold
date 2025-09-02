@@ -4,11 +4,12 @@
 */
 
 #include <arch/x86_64/cpu.h>
+#include <string.h>
 #include <arch/x86_64/serial.h>
 #include <arch/x86_64/printf.h>
 
 /// @brief THe IDT Table
-idt_entry_t idt[256] = {0};
+idt_entry_t idt[256];
 
 void setIDTEntry(uint8_t vector, void (*isr), uint16_t selector, uint8_t ist, uint8_t type_attr) {
     uint64_t offset = (uint64_t)isr;
@@ -77,6 +78,8 @@ extern void isr47();
 void initIDT() {
     asm volatile ("cli"); // Disable interrupts during setup
 
+    memset(&idt, 0, sizeof(idt)); // Clear the IDT
+
     setIDTEntry(0, (void*)isr0, makeSegmentSelector(1, 0, 0), IDT_NO_IST, IDT_TYPE_INTERRUPT_GATE | IDT_TYPE_DPL0 | IDT_PRESENT); // Divide by zero
     setIDTEntry(1, (void*)isr1, makeSegmentSelector(1, 0, 0), IDT_NO_IST, IDT_TYPE_INTERRUPT_GATE | IDT_TYPE_DPL0 | IDT_PRESENT); // Debug
     setIDTEntry(2, (void*)isr2, makeSegmentSelector(1, 0, 0), IDT_NO_IST, IDT_TYPE_INTERRUPT_GATE | IDT_TYPE_DPL0 | IDT_PRESENT); // Non Maskable Interrupt
@@ -133,12 +136,12 @@ void initIDT() {
 void crashISRHandler(isr_registers_t* regs) {
     printf("Crash! Interrupt: %d, Error: %d\n", regs->interrupt, regs->error);
     printf("Spilling registers:\n");
-    printf("RAX: %016x RBX: %016x RCX: %016x RDX: %016x\n", regs->rax, regs->rbx, regs->rcx, regs->rdx);
-    printf("RSI: %016x RDI: %016x RBP: %016x\n", regs->rsi, regs->rdi, regs->rbp);
-    printf("R8 : %016x R9 : %016x R10: %016x R11: %016x\n", regs->r8, regs->r9, regs->r10, regs->r11);
-    printf("R12: %016x R13: %016x R14: %016x R15: %016x\n", regs->r12, regs->r13, regs->r14, regs->r15);
-    printf("CS: %016x RIP: %016x RFLAGS: %016x\n", regs->cs, regs->rip, regs->rflags);
-    printf("SS: %016x RSP: %016x\n", regs->ss, regs->rsp);
+    printf("RAX: %016llx RBX: %016llx RCX: %016llx RDX: %016llx\n", regs->rax, regs->rbx, regs->rcx, regs->rdx);
+    printf("RSI: %016llx RDI: %016llx RBP: %016llx\n", regs->rsi, regs->rdi, regs->rbp);
+    printf("R8 : %016llx R9 : %016llx R10: %016llx R11: %016llx\n", regs->r8, regs->r9, regs->r10, regs->r11);
+    printf("R12: %016llx R13: %016llx R14: %016llx R15: %016llx\n", regs->r12, regs->r13, regs->r14, regs->r15);
+    printf("CS: %016x RIP: %016llx RFLAGS: %016llx\n", regs->cs, regs->rip, regs->rflags);
+    printf("SS: %016x RSP: %016llx\n", regs->ss, regs->rsp);
     while (1) {
         asm volatile ("hlt");
     }

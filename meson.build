@@ -24,7 +24,7 @@ arch_configs = {
     'x86_64': {
         'cflags': ['-m64', '-mcmodel=kernel', '-mno-red-zone', '-mno-mmx', '-mno-sse', '-mno-sse2'],
         'ldflags': ['-m64'],
-        'defines': ['-D ARCH_X86_64=1', '-D ARCH_AARCH64=0', '-D ARCH_RISCV64=0', '-D PRINTF_DISABLE_SUPPORT_FLOAT=1', '-D PRINTF_DISABLE_SUPPORT_PTRDIFF_T=1', '-D UACPI_SIZED_FREES=1'],
+        'defines': ['-D ARCH_X86_64=1', '-D ARCH_AARCH64=0', '-D ARCH_RISCV64=0', '-D PRINTF_DISABLE_SUPPORT_FLOAT=1', '-D PRINTF_DISABLE_SUPPORT_PTRDIFF_T=1', '-D UACPI_SIZED_FREES=1', '-D UACPI_BAREBONES_MODE=1'],
     },
     'aarch64': {
         'cflags': ['-mcpu=generic', '-mgeneral-regs-only'],
@@ -93,7 +93,8 @@ arch_src = {
     'src/arch/x86_64/printf.c',
     'src/arch/x86_64/mm/pmm.c',
     'src/arch/x86_64/mm/vmm.c',
-  ] + uacpi_sources,
+  ] #+ uacpi_sources,
+  ,
   'aarch64': [
     'src/arch/aarch64/boot.c',
   ],

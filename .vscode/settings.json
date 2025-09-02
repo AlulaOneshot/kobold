@@ -11,7 +11,8 @@
         "compare": "c",
         "printf.h": "c",
         "mm.h": "c",
-        "functional": "c"
+        "functional": "c",
+        "utilities.h": "c"
     },
     "mesonbuild.configureOnOpen": true
 }
