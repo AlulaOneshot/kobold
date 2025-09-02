@@ -68,7 +68,5 @@ void _start() {
     initACPI((uint64_t)rsdp_request.response->address);
     printf("ACPI Initialized\n");
 
-    printf("I have become memory managed, destroyer of worlds.\n");
-
     kmain();
 }

@@ -24,7 +24,7 @@ arch_configs = {
     'x86_64': {
         'cflags': ['-m64', '-mcmodel=kernel', '-mno-red-zone', '-mno-mmx', '-mno-sse', '-mno-sse2'],
         'ldflags': ['-m64'],
-        'defines': ['-D ARCH_X86_64=1', '-D ARCH_AARCH64=0', '-D ARCH_RISCV64=0', '-D PRINTF_DISABLE_SUPPORT_FLOAT=1', '-D PRINTF_DISABLE_SUPPORT_PTRDIFF_T=1'],
+        'defines': ['-D ARCH_X86_64=1', '-D ARCH_AARCH64=0', '-D ARCH_RISCV64=0', '-D PRINTF_DISABLE_SUPPORT_FLOAT=1', '-D PRINTF_DISABLE_SUPPORT_PTRDIFF_T=1', '-D UACPI_SIZED_FREES=1'],
     },
     'aarch64': {
         'cflags': ['-mcpu=generic', '-mgeneral-regs-only'],

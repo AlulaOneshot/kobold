@@ -10,14 +10,22 @@ Got 16 memory map entries
 Highest address: 0x1ff62000
 Bitmap size: 16384 bytes (4 pages)
 Placed bitmap at 0x52000
-Found 130697 free pages
+Found 130489 free pages
 PMM Initialized
 Initializing VMM
 Mapping Limine from FFFFFFFF80000000 to FFFFFFFF80001000
-Mapping Kernel Text from FFFFFFFF80001000 to FFFFFFFF80006000
-Mapping Kernel Rodata from FFFFFFFF80006000 to FFFFFFFF80007000
-Mapping Kernel Data from FFFFFFFF80007000 to FFFFFFFF80009000
+Mapping Kernel Text from FFFFFFFF80001000 to FFFFFFFF80031000
+Mapping Kernel Rodata from FFFFFFFF80031000 to FFFFFFFF8003C000
+Mapping Kernel Data from FFFFFFFF8003C000 to FFFFFFFF8003F000
 Mapping Bitmap from FFFF800000052000 to FFFF800000056000
 Loading new Pagemap at FFFF800000056000
 VMM Initialized
-I have become memory managed, destroyer of worlds.
+Initializing ACPI
+ACPI INFO: starting uACPI, version 3.1.0
+
+RSDP Address: 00000000000F52C0
+ACPI INFO:  0x00000000000F52C0 00000000 v00 (               )
+
+ACPI ERROR: both RSDT & XSDT tables are NULL!
+
+ACPI Initialized

@@ -12,4 +12,4 @@ fi
 /home/linuxbrew/.linuxbrew/bin/brew install x86_64-elf-gcc
 /home/linuxbrew/.linuxbrew/bin/brew install aarch64-elf-gcc
 /home/linuxbrew/.linuxbrew/bin/brew install riscv64-elf-gcc
-echo "Environment Setup Complete."
+echo "Environment Setup Complete. Run `source ~/.bashrc` to update your PATH."

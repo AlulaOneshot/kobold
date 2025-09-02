@@ -266,12 +266,19 @@ static inline bool areInterruptsEnabled()
     return flags & (1 << 9);
 }
 
+static inline uint64_t rdtsc(void) {
+    uint32_t lo, hi;
+    __asm__ volatile ("rdtsc" : "=a"(lo), "=d"(hi));
+    return ((uint64_t)hi << 32) | lo;
+}
+
 // PCI Stuff
 
 #define PCI_CONFIG_ADDRESS 0xCF8
 #define PCI_CONFIG_DATA 0xCFC
 
 uint16_t configReadWordPCI(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset);
+void configWriteDoubleWordPCI(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset, uint32_t conf);
 
 // ACPI Stuff
 

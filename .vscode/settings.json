@@ -10,7 +10,8 @@
         "cstdint": "c",
         "compare": "c",
         "printf.h": "c",
-        "mm.h": "c"
+        "mm.h": "c",
+        "functional": "c"
     },
     "mesonbuild.configureOnOpen": true
 }
