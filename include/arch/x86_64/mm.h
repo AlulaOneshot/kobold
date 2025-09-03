@@ -43,10 +43,11 @@ void pmFree(void *ptr, uint64_t size);
 typedef uint64_t pagemap_t[512];
 
 #define VMMAPS_MAPS 32
+#define PTE_ADDR_MASK 0x000FFFFFFFFFF000ULL
 
 // A place to store pagemaps. Useful to make sure the maps are mapped by storing them in one localized place.
 typedef struct {
-    pagemap_t *pml4;
+    pagemap_t *pml4; // The PML4 for this map
     bitmap_t avalibleMaps[VMMAPS_MAPS / 8];
     pagemap_t pagemaps[VMMAPS_MAPS]
 } vmmaps_t;
