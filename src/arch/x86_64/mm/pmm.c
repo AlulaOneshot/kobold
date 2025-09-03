@@ -11,33 +11,15 @@
 #include <arch/x86_64/printf.h>
 #include <math.h>
 #include <string.h>
+#include <bitmaps.h>
 
-uint8_t *bitmap;
+bitmap_t *bitmap;
 /// @brief The highest addressable memory location
 uint64_t highestAddress;
 uint64_t bitmapSize;
 /// @brief The number of free pages
 uint64_t freePages;
 uint64_t hhdmOffset;
-
-/// @brief Sets a bit in the bitmap
-/// @param index The index of the bit to set
-void bitmapSet(uint64_t index) {
-    bitmap[index / 8] |= (1 << (index % 8));
-}
-
-/// @brief Clears a bit in the bitmap
-/// @param index The index of the bit to clear
-void bitmapClear(uint64_t index) {
-    bitmap[index / 8] &= ~(1 << (index % 8));
-}
-
-/// @brief Gets a bit from the bitmap
-/// @param index The index of the bit to get
-/// @return The value of the bit
-bool bitmapGet(size_t index) {
-    return bitmap[index / 8] & (1 << (index % 8));
-}
 
 void initPMM(struct limine_memmap_response *memmapResponse, uint64_t hhdm) {
     hhdmOffset = hhdm;
@@ -74,7 +56,7 @@ void initPMM(struct limine_memmap_response *memmapResponse, uint64_t hhdm) {
             continue;
         if (memmap[i]->length >= bitmapSize)
         {
-            bitmap = (uint8_t *)(memmap[i]->base + hhdmOffset);
+            bitmap = (bitmap_t *)(memmap[i]->base + hhdmOffset);
 
             memset(bitmap, 0xFF, bitmapSize);
 
@@ -100,7 +82,7 @@ void initPMM(struct limine_memmap_response *memmapResponse, uint64_t hhdm) {
         for (uint64_t j = 0; j < memmap[i]->length; j += PAGE_SIZE)
         {
 			freePages++;
-            bitmapClear((memmap[i]->base + j) / PAGE_SIZE);
+            bitmapClearBit(bitmap, (memmap[i]->base + j) / PAGE_SIZE);
         }
     }
 
@@ -133,7 +115,7 @@ void *pmAlloc(uint64_t size) {
     uint64_t currentStreak = 0;
 
     for (uint64_t i = 0; i < (highestAddress / PAGE_SIZE); i++) {
-        if (!bitmapGet(i)) {
+        if (!bitmapGetBit(bitmap, i)) {
             currentStreak++;
         } else {
             currentStreak = 0;
@@ -142,7 +124,7 @@ void *pmAlloc(uint64_t size) {
         if (currentStreak == pages) {
             // We found a big enough streak
             for (uint64_t j = 0; j < pages; j++) {
-                bitmapSet(i - j);
+                bitmapSetBit(bitmap, i - j);
             }
 
             freePages -= pages;
@@ -163,7 +145,7 @@ void pmFree(void *ptr, uint64_t size) {
     uint64_t index = (uint64_t)ptr / PAGE_SIZE;
 
     for (uint64_t i = 0; i < pages; i++) {
-        bitmapClear(index + i);
+        bitmapClearBit(bitmap, index + i);
     }
 
     freePages += pages;

@@ -15,13 +15,14 @@
 #include <string.h>
 #include <arch/x86_64/printf.h>
 #include <math.h>
+#include <bitmaps.h>
 
 #define PAGE_SIZE 0x1000 // 4KB
 
 /// @brief The offset where the higher half kernel is mapped
 extern uint64_t hhdmOffset;
 /// @brief A bitmap representing used/free physical memory pages
-extern uint8_t *bitmap;
+extern bitmap_t *bitmap;
 /// @brief The size of the physical memory bitmap in bytes
 extern uint64_t bitmapSize;
 
@@ -41,10 +42,14 @@ void pmFree(void *ptr, uint64_t size);
 /// @brief A page map (PML4, PML3, PML2, or PML1)
 typedef uint64_t pagemap_t[512];
 
+#define VMMAPS_MAPS 32
+
+// A place to store pagemaps. Useful to make sure the maps are mapped by storing them in one localized place.
 typedef struct {
     pagemap_t *pml4;
-    
-} vmmcache_t;
+    bitmap_t avalibleMaps[VMMAPS_MAPS / 8];
+    pagemap_t pagemaps[VMMAPS_MAPS]
+} vmmaps_t;
 
 //TODO: PML5
 
@@ -66,5 +71,9 @@ typedef struct {
 // bit 63 No Execute
 
 extern pagemap_t *kernelPML4;
+
+void initVMM();
+
+
 
 #endif

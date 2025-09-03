@@ -25,6 +25,9 @@ void writeSerial(const char* str) {
 
 void writeSerialChar(char c) {
     while (isSerialTransmitEmpty() == 0);
+    if (c == '\n') {
+        outb(0x3F8, '\r');
+    }
     outb(0x3F8, c);
 }
 

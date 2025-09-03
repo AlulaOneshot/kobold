@@ -6,19 +6,13 @@ GDT Initialized
 Initializing IDT
 IDT Initialized
 Initializing PMM
-Got 16 memory map entries
-Highest address: 0x1ff62000
-Bitmap size: 16384 bytes (4 pages)
+Got 14 memory map entries
+Highest address: 0x7f63000
+Bitmap size: 4096 bytes (1 pages)
 Placed bitmap at 0x52000
-Found 130697 free pages
+Found 32397 free pages
 PMM Initialized
 Initializing VMM
-Mapping Limine from FFFFFFFF80000000 to FFFFFFFF80001000
-Mapping Kernel Text from FFFFFFFF80001000 to FFFFFFFF80006000
-Mapping Kernel Rodata from FFFFFFFF80006000 to FFFFFFFF80007000
-Mapping Kernel Data from FFFFFFFF80007000 to FFFFFFFF80009000
-Mapping Bitmap from FFFF800000052000 to FFFF800000056000
-Loading new Pagemap at FFFF800000056000
 VMM Initialized
 Initializing ACPI
 ACPI Initialized

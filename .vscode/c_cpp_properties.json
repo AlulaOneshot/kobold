@@ -4,6 +4,7 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/include",
+                "${workspaceFolder}/subprojects/bitmaps/include",
                 "${workspaceFolder}/subprojects/libk/include/x86_64/include",
                 "${workspaceFolder}/subprojects/uacpi/include"
             ],
@@ -12,7 +13,7 @@
             "cppStandard": "c++17",
             "intelliSenseMode": "linux-gcc-x64",
             "configurationProvider": "mesonbuild.mesonbuild",
-            "compilerPath": "/home/linuxbrew/.linuxbrew/bin/x86_64-elf-gcc",
+            "compilerPath": "/opt/homebrew/bin/x86_64-elf-gcc",
             "compilerArgs": [
                 "-ffreestanding",
                 "-fno-stack-protector",

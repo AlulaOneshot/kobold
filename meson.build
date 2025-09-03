@@ -1,5 +1,10 @@
 project('kobold', 'c', version: '0.1.0', license: 'MPL-2.0-or-later')
 
+# Submodules
+bitmaps = subproject('bitmaps')
+bitmap_sources = bitmaps.get_variable('sources')
+bitmaps_includes = bitmaps.get_variable('include_directories')
+
 # Getting configs
 supported_archs = ['x86_64', 'aarch64', 'riscv64']
 
@@ -74,7 +79,7 @@ uacpi_includes = uacpi.get_variable('includes')
 
 includes = [include_directories([
   'include',
-  ])] + uacpi_includes
+  ])] + uacpi_includes + bitmaps_includes
 
 common_src = [
   'src/kmain.c',
@@ -92,8 +97,8 @@ arch_src = {
     'src/arch/x86_64/serial.c',
     'src/arch/x86_64/printf.c',
     'src/arch/x86_64/mm/pmm.c',
-    'src/arch/x86_64/mm/vmm.c',
-  ] #+ uacpi_sources,
+    'src/arch/x86_64/mm/vmm-rewrite.c',
+  ] + bitmap_sources #+ uacpi_sources,
   ,
   'aarch64': [
     'src/arch/aarch64/boot.c',
