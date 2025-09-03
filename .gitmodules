@@ -1,3 +1,6 @@
 [submodule "subprojects/uacpi"]
 	path = subprojects/uacpi
 	url = https://github.com/uACPI/uACPI
+[submodule "subprojects/bitmaps"]
+	path = subprojects/bitmaps
+	url = https://github.com/AlulaOneshot/bitmaps
