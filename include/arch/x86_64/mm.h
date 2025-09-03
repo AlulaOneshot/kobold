@@ -75,6 +75,4 @@ extern pagemap_t *kernelPML4;
 
 void initVMM();
 
-
-
 #endif

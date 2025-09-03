@@ -1,4 +1,5 @@
 #include <arch/x86_64/mm.h>
+#include <arch/x86_64/printf.h>
 #include <math.h>
 
 extern char limineStart[], limineEnd[];
@@ -24,7 +25,7 @@ void vmEnsureCapacity(vmmaps_t ***mapsPtr, uint64_t *mapsCapacity, uint64_t coun
     // Allocate new array
     vmmaps_t **newMaps = pmAlloc(sizeof(vmmaps_t *) * newCap);
     if (!newMaps) {
-        panic("vmEnsureCapacity: Failed to allocate vmmaps array\n");
+        printf("vmEnsureCapacity: Failed to allocate vmmaps array\n");
     }
 
     // Copy old entries if any
@@ -82,7 +83,7 @@ void vmMapPage(pagemap_t *map, void *virtual, uint64_t phys, uint64_t flag_mask)
 
     if (((*pt)[ptIndex]) & PAGE_PRESENT) {
         // Already mapped
-        panic("vmMapPage: Virtual address %p is already mapped!\n", virtual);
+        printf("vmMapPage: Virtual address %p is already mapped!\n", virtual);
     }
 
     (*pt)[ptIndex] = entry | PAGE_PRESENT;
@@ -95,22 +96,22 @@ void vmUnmapPage(pagemap_t *map, void *virtual) {
     uint64_t ptIndex   = ((uint64_t)virtual >> 12) & 0x1FF;
 
     if (!((uint64_t)((*map)[pml4Index]) & PAGE_PRESENT)) {
-        panic("vmUnmapPage: Virtual address %p is not mapped (PML4)!\n", virtual);
+        printf("vmUnmapPage: Virtual address %p is not mapped (PML4)!\n", virtual);
     }
     pagemap_t *pdpt = (pagemap_t *)(((uint64_t)(*map)[pml4Index] & PTE_ADDR_MASK) + hhdmOffset);
 
     if (!((uint64_t)((*pdpt)[pdptIndex]) & PAGE_PRESENT)) {
-        panic("vmUnmapPage: Virtual address %p is not mapped (PDPT)!\n", virtual);
+        printf("vmUnmapPage: Virtual address %p is not mapped (PDPT)!\n", virtual);
     }
     pagemap_t *pd = (pagemap_t *)(((uint64_t)(*pdpt)[pdptIndex] & PTE_ADDR_MASK) + hhdmOffset);
 
     if (!((uint64_t)((*pd)[pdIndex]) & PAGE_PRESENT)) {
-        panic("vmUnmapPage: Virtual address %p is not mapped (PD)!\n", virtual);
+        printf("vmUnmapPage: Virtual address %p is not mapped (PD)!\n", virtual);
     }
     pagemap_t *pt = (pagemap_t *)(((uint64_t)(*pd)[pdIndex] & PTE_ADDR_MASK) + hhdmOffset);
 
     if (!((uint64_t)((*pt)[ptIndex]) & PAGE_PRESENT)) {
-        panic("vmUnmapPage: Virtual address %p is not mapped (PT)!\n", virtual);
+        printf("vmUnmapPage: Virtual address %p is not mapped (PT)!\n", virtual);
     }
 
     (*pt)[ptIndex] = 0; // Unmap
@@ -167,22 +168,22 @@ uint64_t vmGetPhysical(pagemap_t *map, void *virtual) {
     uint64_t ptIndex   = ((uint64_t)virtual >> 12) & 0x1FF;
 
     if (!((uint64_t)((*map)[pml4Index]) & PAGE_PRESENT)) {
-        panic("vmGetPhysical: Virtual address %p is not mapped (PML4)!\n", virtual);
+        printf("vmGetPhysical: Virtual address %p is not mapped (PML4)!\n", virtual);
     }
     pagemap_t *pdpt = (pagemap_t *)(((uint64_t)(*map)[pml4Index] & PTE_ADDR_MASK) + hhdmOffset);
 
     if (!((uint64_t)((*pdpt)[pdptIndex]) & PAGE_PRESENT)) {
-        panic("vmGetPhysical: Virtual address %p is not mapped (PDPT)!\n", virtual);
+        printf("vmGetPhysical: Virtual address %p is not mapped (PDPT)!\n", virtual);
     }
     pagemap_t *pd = (pagemap_t *)(((uint64_t)(*pdpt)[pdptIndex] & PTE_ADDR_MASK) + hhdmOffset);
 
     if (!((uint64_t)((*pd)[pdIndex]) & PAGE_PRESENT)) {
-        panic("vmGetPhysical: Virtual address %p is not mapped (PD)!\n", virtual);
+        printf("vmGetPhysical: Virtual address %p is not mapped (PD)!\n", virtual);
     }
     pagemap_t *pt = (pagemap_t *)(((uint64_t)(*pd)[pdIndex] & PTE_ADDR_MASK) + hhdmOffset);
 
     if (!((uint64_t)((*pt)[ptIndex]) & PAGE_PRESENT)) {
-        panic("vmGetPhysical: Virtual address %p is not mapped (PT)!\n", virtual);
+        printf("vmGetPhysical: Virtual address %p is not mapped (PT)!\n", virtual);
     }
 
     return ((*pt)[ptIndex] & PTE_ADDR_MASK) | ((uint64_t)virtual & 0xFFF);
@@ -195,22 +196,22 @@ void vmModifyFlags(pagemap_t *map, void *virtual, uint64_t flag_mask, bool set) 
     uint64_t ptIndex   = ((uint64_t)virtual >> 12) & 0x1FF;
 
     if (!((uint64_t)((*map)[pml4Index]) & PAGE_PRESENT)) {
-        panic("vmModifyFlags: Virtual address %p is not mapped (PML4)!\n", virtual);
+        printf("vmModifyFlags: Virtual address %p is not mapped (PML4)!\n", virtual);
     }
     pagemap_t *pdpt = (pagemap_t *)(((uint64_t)(*map)[pml4Index] & PTE_ADDR_MASK) + hhdmOffset);
 
     if (!((uint64_t)((*pdpt)[pdptIndex]) & PAGE_PRESENT)) {
-        panic("vmModifyFlags: Virtual address %p is not mapped (PDPT)!\n", virtual);
+        printf("vmModifyFlags: Virtual address %p is not mapped (PDPT)!\n", virtual);
     }
     pagemap_t *pd = (pagemap_t *)(((uint64_t)(*pdpt)[pdptIndex] & PTE_ADDR_MASK) + hhdmOffset);
 
     if (!((uint64_t)((*pd)[pdIndex]) & PAGE_PRESENT)) {
-        panic("vmModifyFlags: Virtual address %p is not mapped (PD)!\n", virtual);
+        printf("vmModifyFlags: Virtual address %p is not mapped (PD)!\n", virtual);
     }
     pagemap_t *pt = (pagemap_t *)(((uint64_t)(*pd)[pdIndex] & PTE_ADDR_MASK) + hhdmOffset);
 
     if (!((uint64_t)((*pt)[ptIndex]) & PAGE_PRESENT)) {
-        panic("vmModifyFlags: Virtual address %p is not mapped (PT)!\n", virtual);
+        printf("vmModifyFlags: Virtual address %p is not mapped (PT)!\n", virtual);
     }
 
     if (set) {
@@ -228,7 +229,7 @@ void vmReloadCR3() {
     asm volatile ("mov %0, %%cr3" :: "r"(cr3));
 }
 
-void vmmInit() {
+void initVMM() {
     uint64_t limineStartAligned = ALIGN_DOWN((uint64_t)&limineStart, PAGE_SIZE);
     uint64_t limineEndAligned = ALIGN_UP((uint64_t)&limineEnd, PAGE_SIZE);
     
@@ -241,5 +242,26 @@ void vmmInit() {
     uint64_t bitmapStartAligned = ALIGN_DOWN((uint64_t)bitmap, PAGE_SIZE);
     uint64_t bitmapEndAligned = ALIGN_UP((uint64_t)bitmap + bitmapSize, PAGE_SIZE);
 
-    
+    // Setup the top page-table
+    kernelPML4 = (pagemap_t *)((uint64_t)(pmAlloc(sizeof(pagemap_t))) + hhdmOffset);
+
+    memset(kernelPML4, 0, sizeof(pagemap_t));
+
+    vmMapRange(kernelPML4, (void*)limineStartAligned, limineStartAligned, limineEndAligned - limineStartAligned, PAGE_PRESENT | PAGE_WRITABLE);
+
+    // Map kernel text as read-only
+    vmMapRange(kernelPML4, (void*)textStartAligned, textStartAligned, textEndAligned - textStartAligned, PAGE_PRESENT);
+
+    // Map kernel data as read/write
+    vmMapRange(kernelPML4, (void*)dataStartAligned, dataStartAligned, dataEndAligned - dataStartAligned, PAGE_PRESENT | PAGE_WRITABLE);
+
+    // Map bitmap
+    vmMapRange(kernelPML4, (void*)bitmapStartAligned, bitmapStartAligned, bitmapEndAligned - bitmapStartAligned, PAGE_PRESENT | PAGE_WRITABLE);
+
+    // if (!vmIsMapped(kernelPML4, &textStart)) {
+    // printf("Kernel text is not mapped!\n");
+    // }
+
+    // uint64_t phys = vmGetPhysical(kernelPML4, &dataStart);
+    // printf("Physical address of dataStart: 0x%llx\n", phys);
 }
