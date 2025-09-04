@@ -1,19 +1,19 @@
 Serial Initialized
 Limine Base Protocol Supported
 Got Higher Half Direct Map of FFFF800000000000
+Initializing FPU
+FPU Initialized
 Initializing GDT
 GDT Initialized
 Initializing IDT
 IDT Initialized
 Initializing PMM
 Got 16 memory map entries
-Highest address: 0x1ff62000
-Bitmap size: 16384 bytes (4 pages)
+Highest address: 0xf62000
+Bitmap size: 4096 bytes (1 pages)
 Placed bitmap at 0x52000
-Found 130696 free pages
+Found 3723 free pages
 PMM Initialized
 Initializing VMM
-Physical address of dataStart: 0x1ff2a000
+Physical address of dataStart: 0xf2a000
 VMM Initialized
-Initializing ACPI
-ACPI Initialized

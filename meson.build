@@ -71,15 +71,9 @@ defines = config['defines'] + [
   '-D KERNEL_VERSION="@0@"'.format(meson.project_version()),
 ]
 
-uacpi = subproject('uacpi')
-
-uacpi_sources = uacpi.get_variable('sources')
-
-uacpi_includes = uacpi.get_variable('includes')
-
 includes = [include_directories([
   'include',
-  ])] + uacpi_includes + bitmaps_includes
+  ])] + bitmaps_includes
 
 common_src = [
   'src/kmain.c',
@@ -92,13 +86,12 @@ arch_src = {
     'src/arch/x86_64/cpu/gdt.s',
     'src/arch/x86_64/cpu/idt.c',
     'src/arch/x86_64/cpu/isr.s',
-    'src/arch/x86_64/cpu/acpi.c',
-    'src/arch/x86_64/cpu/pci.c',
     'src/arch/x86_64/serial.c',
     'src/arch/x86_64/printf.c',
     'src/arch/x86_64/mm/pmm.c',
-    'src/arch/x86_64/mm/vmm-rewrite.c',
-  ] + bitmap_sources #+ uacpi_sources,
+    'src/arch/x86_64/mm/vmm.c',
+    'src/arch/x86_64/cpu/fpu.c',
+  ] + bitmap_sources
   ,
   'aarch64': [
     'src/arch/aarch64/boot.c',

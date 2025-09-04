@@ -75,4 +75,56 @@ extern pagemap_t *kernelPML4;
 
 void initVMM(struct limine_memmap_response *memmap, struct limine_kernel_address_response *kernelAddressResponse);
 
+/// @brief Get some contiguous virtual memory. Maps pages as needed. If physical address is NULL, allocates new physical memory.
+void *vmGetSpace(uint64_t physicalAddress, uint64_t size);
+
+// Allocator
+
+typedef struct {
+    uint8_t *freeMap; // Bitmap to track free/used blocks
+    uint16_t blockSize;
+    uint16_t totalBlocks;
+    uint16_t freeBlocks;
+    struct slab *next;
+    struct slab *prev;
+    void *memory;
+} slab_t;
+
+static inline slab_t *newSlab(slab_t *previous, uint16_t blockSize, uint16_t totalBlocks) {
+    uint64_t sizeRequired = sizeof(slab_t) + (totalBlocks / 8) + (totalBlocks * blockSize); // Size of struct + bitmap + memory
+    uint64_t area = pmAlloc(sizeRequired);
+    void *virtual = vmGetSpace(area, sizeRequired);
+    slab_t *slab = (slab_t *)virtual;
+    slab->blockSize = blockSize;
+    slab->totalBlocks = totalBlocks;
+    slab->freeBlocks = totalBlocks;
+    slab->next = NULL;
+    slab->prev = previous;
+    previous->next = slab;
+    slab->memory = (void *)((uint64_t)virtual + sizeof(slab_t) + (totalBlocks / 8));
+    slab->freeMap = (uint8_t *)((uint64_t)virtual + sizeof(slab_t));
+    memset(slab->freeMap, 0x00, totalBlocks / 8); // All blocks free
+    return slab;
+}
+
+static inline void *getSlabSpace(slab_t *first, uint64_t required) {
+    slab_t *current = first;
+    while (current) {
+        if (current->blockSize >= required && current->freeBlocks > 0) {
+            // Find a free block
+            for (uint16_t i = 0; i < current->totalBlocks; i++) {
+                if (bitmapGetBit(current->freeMap, i) == 0) {
+                    // Found a free block
+                    bitmapSetBit(current->freeMap, i);
+                    current->freeBlocks -= 1;
+                    return (void *)((uint64_t)current->memory + (i * current->blockSize));
+                }
+            }
+        }
+        current = current->next;
+    }
+    newSlab(current, required, ); // Create a new slab with 4KB of memory
+    return getSlabSpace(first, required); // Try again
+}
+
 #endif

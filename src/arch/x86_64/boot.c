@@ -46,6 +46,9 @@ void _start() {
 
     printf("Got Higher Half Direct Map of %p\n", hhdm_request.response->offset);
 
+    printf("Initializing FPU\n");
+    initFPU();
+    printf("FPU Initialized\n");
     printf("Initializing GDT\n");
     initGDT();
     printf("GDT Initialized\n");
@@ -58,9 +61,7 @@ void _start() {
     printf("Initializing VMM\n");
     initVMM(memmap_request.response, kernel_address_request.response);
     printf("VMM Initialized\n");
-    printf("Initializing ACPI\n");
-    initACPI();
-    printf("ACPI Initialized\n");
+    
 
     kmain();
 }

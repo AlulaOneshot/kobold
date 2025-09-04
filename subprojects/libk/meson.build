@@ -59,7 +59,8 @@ src = {
     'src/arch/x86_64/string/memcpy.c',
     'src/arch/x86_64/string/memmove.c',
     'src/arch/x86_64/string/memset.c',
-    'src/arch/x86_64/string/strlen.c'
+    'src/arch/x86_64/string/strlen.c',
+    'src/arch/x86_64/stdlib/malloc.c',
   ],
   'aarch64': [
     

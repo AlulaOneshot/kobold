@@ -1,5 +1,6 @@
 #include <arch/x86_64/mm.h>
 #include <arch/x86_64/printf.h>
+#include <arch/x86_64/cpu.h>
 #include <math.h>
 
 extern char limineStart[], limineEnd[];
@@ -224,16 +225,28 @@ void vmModifyFlags(pagemap_t *map, void *virtual, uint64_t flag_mask, bool set) 
     __asm__ volatile("invlpg (%0)" ::"r"(virtual) : "memory");
 }
 
-// Just a reload to flush TLBs
-void vmReloadCR3() {
-    uint64_t cr3;
-    asm volatile ("mov %%cr3, %0" : "=r"(cr3));
-    asm volatile ("mov %0, %%cr3" :: "r"(cr3));
-}
-
-void vmLoadCR3(pagemap_t *pml4) {
-    uint64_t phys = (uint64_t)pml4 - hhdmOffset;
-    asm volatile ("mov %0, %%cr3" :: "r"(phys & ~0xFFFULL));
+void *vmGetSpace(uint64_t physicalAddress, uint64_t size) {
+    uint64_t pages = (size + PAGE_SIZE - 1) / PAGE_SIZE;
+    if (physicalAddress == 0) {
+        physicalAddress = (uint64_t)pmAlloc(pages * PAGE_SIZE);
+        if (physicalAddress == 0) {
+            printf("vmGetSpace: Failed to allocate physical memory\n");
+            return;
+        }
+    }
+    uint64_t range = 0;
+    for (uint64_t i = 0x1000; i < 0xFFFFFFFFFFFFF000; i += PAGE_SIZE) {
+        if (!vmIsMapped(kernelPML4, (void *)i)) {
+            range += PAGE_SIZE;
+            if (range >= pages * PAGE_SIZE) {
+                vmMapRange(kernelPML4, (void *)(i - range + PAGE_SIZE), physicalAddress, pages * PAGE_SIZE, PAGE_WRITABLE);
+                return (void *)(i - range + PAGE_SIZE);
+            }
+        } else {
+            range = 0;
+        }
+    }
+    printf("vmGetSpace: Failed to find a large enough virtual memory range\n");
 }
 
 void initVMM(struct limine_memmap_response *memmap, struct limine_kernel_address_response *kernelAddressResponse) {
@@ -259,12 +272,10 @@ void initVMM(struct limine_memmap_response *memmap, struct limine_kernel_address
 
     memset(kernelPML4, 0, sizeof(pagemap_t));
 
-    uint64_t cur_cr3;
-    asm volatile ("mov %%cr3, %0" : "=r"(cur_cr3));
-    pagemap_t *cur_pml4 = (pagemap_t *)(cur_cr3 + hhdmOffset);
+    pagemap_t *cur_pml4 = (pagemap_t *)((getCR3()) + hhdmOffset);
     memcpy(kernelPML4, cur_pml4, PAGE_SIZE);
 
-    vmLoadCR3(kernelPML4);
+    setCR3((uint64_t)kernelPML4 - hhdmOffset);
 
     if (!vmIsMapped(kernelPML4, &textStart)) {
     printf("Kernel text is not mapped!\n");
