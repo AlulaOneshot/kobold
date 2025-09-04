@@ -61,7 +61,6 @@ void _start() {
     printf("Initializing VMM\n");
     initVMM(memmap_request.response, kernel_address_request.response);
     printf("VMM Initialized\n");
-    
 
     kmain();
 }

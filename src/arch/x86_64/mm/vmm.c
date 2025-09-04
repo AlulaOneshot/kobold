@@ -14,7 +14,7 @@ vmmaps_t **kernelMaps = NULL;
 uint64_t mapsCount = 0; // Starts at 0
 uint64_t mapsCapacity = 0;
 
-void vmEnsureCapacity(vmmaps_t ***mapsPtr, uint64_t *mapsCapacity, uint64_t countNeeded) {
+static void vmEnsureCapacity(vmmaps_t ***mapsPtr, uint64_t *mapsCapacity, uint64_t countNeeded) {
     if (*mapsCapacity >= countNeeded) {
         return; // enough space already
     }
@@ -231,40 +231,26 @@ void *vmGetSpace(uint64_t physicalAddress, uint64_t size) {
         physicalAddress = (uint64_t)pmAlloc(pages * PAGE_SIZE);
         if (physicalAddress == 0) {
             printf("vmGetSpace: Failed to allocate physical memory\n");
-            return;
+            return NULL;
         }
     }
     uint64_t range = 0;
     for (uint64_t i = 0x1000; i < 0xFFFFFFFFFFFFF000; i += PAGE_SIZE) {
         if (!vmIsMapped(kernelPML4, (void *)i)) {
-            range += PAGE_SIZE;
-            if (range >= pages * PAGE_SIZE) {
-                vmMapRange(kernelPML4, (void *)(i - range + PAGE_SIZE), physicalAddress, pages * PAGE_SIZE, PAGE_WRITABLE);
-                return (void *)(i - range + PAGE_SIZE);
+            range += 1;
+            if (range * PAGE_SIZE >= pages * PAGE_SIZE) {
+                vmMapRange(kernelPML4, (void *)(i - range), physicalAddress, pages * PAGE_SIZE, PAGE_WRITABLE);
+                return (void *)(i - range);
             }
         } else {
             range = 0;
         }
     }
     printf("vmGetSpace: Failed to find a large enough virtual memory range\n");
+    return NULL;
 }
 
 void initVMM(struct limine_memmap_response *memmap, struct limine_kernel_address_response *kernelAddressResponse) {
-    uint64_t limineStartAligned = ALIGN_DOWN((uint64_t)&limineStart, PAGE_SIZE);
-    uint64_t limineEndAligned = ALIGN_UP((uint64_t)&limineEnd, PAGE_SIZE);
-    
-    uint64_t textStartAligned = ALIGN_DOWN((uint64_t)&textStart, PAGE_SIZE);
-    uint64_t textEndAligned = ALIGN_UP((uint64_t)&textEnd, PAGE_SIZE);
-
-    uint64_t rodataStartAligned = ALIGN_DOWN((uint64_t)&rodataStart, PAGE_SIZE);
-    uint64_t rodataEndAligned = ALIGN_UP((uint64_t)&rodataEnd, PAGE_SIZE);
-    
-    uint64_t dataStartAligned = ALIGN_DOWN((uint64_t)&dataStart, PAGE_SIZE);
-    uint64_t dataEndAligned = ALIGN_UP((uint64_t)&dataEnd, PAGE_SIZE);
-
-    uint64_t bitmapStartAligned = ALIGN_DOWN((uint64_t)bitmap, PAGE_SIZE);
-    uint64_t bitmapEndAligned = ALIGN_UP((uint64_t)bitmap + bitmapSize, PAGE_SIZE);
-
     vmEnsureCapacity(&kernelMaps, &mapsCapacity, mapsCount + 1);
 
     // Setup the top page-table

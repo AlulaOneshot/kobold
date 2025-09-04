@@ -91,6 +91,7 @@ arch_src = {
     'src/arch/x86_64/mm/pmm.c',
     'src/arch/x86_64/mm/vmm.c',
     'src/arch/x86_64/cpu/fpu.c',
+    'src/arch/x86_64/mm/alloc.c',
   ] + bitmap_sources
   ,
   'aarch64': [
