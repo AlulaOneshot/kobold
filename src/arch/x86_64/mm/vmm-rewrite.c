@@ -17,13 +17,13 @@ void vmEnsureCapacity(vmmaps_t ***mapsPtr, uint64_t *mapsCapacity, uint64_t coun
         return; // enough space already
     }
 
-    uint64_t newCap = *mapsCapacity ? *mapsCapacity * 2 : 16; // grow 1.5x or start at 16
+    uint64_t newCap = *mapsCapacity ? *mapsCapacity * 2 : 16; // grow 2x or start at 16
     if (newCap < countNeeded) {
         newCap = countNeeded; // make sure it's enough
     }
 
     // Allocate new array
-    vmmaps_t **newMaps = pmAlloc(sizeof(vmmaps_t *) * newCap);
+    vmmaps_t **newMaps = (vmmaps_t **)((uint64_t)pmAlloc(sizeof(vmmaps_t *) * newCap) + hhdmOffset);
     if (!newMaps) {
         printf("vmEnsureCapacity: Failed to allocate vmmaps array\n");
     }
@@ -56,7 +56,8 @@ static pagemap_t *vmGetOrAllocTable(pagemap_t *parent, uint64_t index, uint64_t 
     if (!((uint64_t)((*parent)[index]) & PAGE_PRESENT)) {
         pagemap_t *freetable = vmMapsFindFreeSlot(kernelMaps, mapsCount);
         if (!freetable) {
-            kernelMaps[mapsCount] = (vmmaps_t *)((uint64_t)pmAlloc(sizeof(vmmaps_t)) + hhdmOffset);
+            uint64_t phys = (uint64_t)pmAlloc(sizeof(vmmaps_t));
+            kernelMaps[mapsCount] = (vmmaps_t *)(phys + hhdmOffset);
             memset(kernelMaps[mapsCount], 0, sizeof(vmmaps_t));
             kernelMaps[mapsCount]->pml4 = kernelPML4;
             freetable = &kernelMaps[mapsCount]->pagemaps[0];
@@ -229,7 +230,11 @@ void vmReloadCR3() {
     asm volatile ("mov %0, %%cr3" :: "r"(cr3));
 }
 
-void initVMM() {
+void vmLoadCR3(pagemap_t *pml4) {
+    asm volatile ("mov %0, %%cr3" :: "r"((uint64_t)pml4 - hhdmOffset));
+}
+
+void initVMM(struct limine_memmap_response *memmap) {
     uint64_t limineStartAligned = ALIGN_DOWN((uint64_t)&limineStart, PAGE_SIZE);
     uint64_t limineEndAligned = ALIGN_UP((uint64_t)&limineEnd, PAGE_SIZE);
     
@@ -242,26 +247,34 @@ void initVMM() {
     uint64_t bitmapStartAligned = ALIGN_DOWN((uint64_t)bitmap, PAGE_SIZE);
     uint64_t bitmapEndAligned = ALIGN_UP((uint64_t)bitmap + bitmapSize, PAGE_SIZE);
 
+    vmEnsureCapacity(&kernelMaps, &mapsCapacity, mapsCount + 1);
+
     // Setup the top page-table
     kernelPML4 = (pagemap_t *)((uint64_t)(pmAlloc(sizeof(pagemap_t))) + hhdmOffset);
 
     memset(kernelPML4, 0, sizeof(pagemap_t));
 
-    vmMapRange(kernelPML4, (void*)limineStartAligned, limineStartAligned, limineEndAligned - limineStartAligned, PAGE_PRESENT | PAGE_WRITABLE);
+    for (uint64_t i = 0; i < memmap->entry_count; i++) {
+        vmMapRange(kernelPML4, (void *)(memmap->entries[i]->base + hhdmOffset), memmap->entries[i]->base, memmap->entries[i]->length, PAGE_PRESENT | PAGE_WRITABLE);
+    }
+
+    vmMapRange(kernelPML4, (void*)limineStartAligned, limineStartAligned - hhdmOffset, limineEndAligned - limineStartAligned, PAGE_PRESENT | PAGE_WRITABLE);
 
     // Map kernel text as read-only
-    vmMapRange(kernelPML4, (void*)textStartAligned, textStartAligned, textEndAligned - textStartAligned, PAGE_PRESENT);
+    vmMapRange(kernelPML4, (void*)textStartAligned, textStartAligned - hhdmOffset, textEndAligned - textStartAligned, PAGE_PRESENT);
 
     // Map kernel data as read/write
-    vmMapRange(kernelPML4, (void*)dataStartAligned, dataStartAligned, dataEndAligned - dataStartAligned, PAGE_PRESENT | PAGE_WRITABLE);
+    vmMapRange(kernelPML4, (void*)dataStartAligned, dataStartAligned - hhdmOffset, dataEndAligned - dataStartAligned, PAGE_PRESENT | PAGE_WRITABLE);
 
     // Map bitmap
-    vmMapRange(kernelPML4, (void*)bitmapStartAligned, bitmapStartAligned, bitmapEndAligned - bitmapStartAligned, PAGE_PRESENT | PAGE_WRITABLE);
+    vmMapRange(kernelPML4, (void*)bitmapStartAligned, bitmapStartAligned - hhdmOffset, bitmapEndAligned - bitmapStartAligned, PAGE_PRESENT | PAGE_WRITABLE);
 
-    // if (!vmIsMapped(kernelPML4, &textStart)) {
-    // printf("Kernel text is not mapped!\n");
-    // }
+    vmLoadCR3(kernelPML4);
 
-    // uint64_t phys = vmGetPhysical(kernelPML4, &dataStart);
-    // printf("Physical address of dataStart: 0x%llx\n", phys);
+    if (!vmIsMapped(kernelPML4, &textStart)) {
+    printf("Kernel text is not mapped!\n");
+    }
+
+    uint64_t phys = vmGetPhysical(kernelPML4, &dataStart);
+    printf("Physical address of dataStart: 0x%llx\n", phys);
 }

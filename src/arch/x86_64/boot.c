@@ -56,7 +56,7 @@ void _start() {
     initPMM(memmap_request.response, hhdm_request.response->offset);
     printf("PMM Initialized\n");
     printf("Initializing VMM\n");
-    initVMM();
+    initVMM(memmap_request.response);
     printf("VMM Initialized\n");
     printf("Initializing ACPI\n");
     initACPI();
