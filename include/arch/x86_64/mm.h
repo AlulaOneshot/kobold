@@ -73,6 +73,6 @@ typedef struct {
 
 extern pagemap_t *kernelPML4;
 
-void initVMM(struct limine_memmap_response *memmap);
+void initVMM(struct limine_memmap_response *memmap, struct limine_kernel_address_response *kernelAddressResponse);
 
 #endif
