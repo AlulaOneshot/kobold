@@ -5,6 +5,10 @@ bitmaps = subproject('bitmaps')
 bitmap_sources = bitmaps.get_variable('sources')
 bitmaps_includes = bitmaps.get_variable('include_directories')
 
+uacpi = subproject('uacpi')
+uacpi_sources = uacpi.get_variable('sources')
+uacpi_includes = uacpi.get_variable('includes')
+
 # Getting configs
 supported_archs = ['x86_64', 'aarch64', 'riscv64']
 
@@ -29,7 +33,7 @@ arch_configs = {
     'x86_64': {
         'cflags': ['-m64', '-mcmodel=kernel', '-mno-red-zone', '-mno-mmx', '-mno-sse', '-mno-sse2'],
         'ldflags': ['-m64'],
-        'defines': ['-D ARCH_X86_64=1', '-D ARCH_AARCH64=0', '-D ARCH_RISCV64=0', '-D PRINTF_DISABLE_SUPPORT_FLOAT=1', '-D PRINTF_DISABLE_SUPPORT_PTRDIFF_T=1', '-D UACPI_SIZED_FREES=1', '-D UACPI_BAREBONES_MODE=1'],
+        'defines': ['-D ARCH_X86_64=1', '-D ARCH_AARCH64=0', '-D ARCH_RISCV64=0', '-D PRINTF_DISABLE_SUPPORT_FLOAT=1', '-D PRINTF_DISABLE_SUPPORT_PTRDIFF_T=1'],
     },
     'aarch64': {
         'cflags': ['-mcpu=generic', '-mgeneral-regs-only'],
@@ -73,7 +77,7 @@ defines = config['defines'] + [
 
 includes = [include_directories([
   'include',
-  ])] + bitmaps_includes
+  ])] + bitmaps_includes + uacpi_includes
 
 common_src = [
   'src/kmain.c',
@@ -92,7 +96,9 @@ arch_src = {
     'src/arch/x86_64/mm/vmm.c',
     'src/arch/x86_64/cpu/fpu.c',
     'src/arch/x86_64/mm/alloc.c',
-  ] + bitmap_sources
+    'src/arch/x86_64/cpu/acpi.c',
+    'src/arch/x86_64/cpu/pci.c',
+  ] + bitmap_sources + uacpi_sources
   ,
   'aarch64': [
     'src/arch/aarch64/boot.c',

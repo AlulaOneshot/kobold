@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 /*
     The Kobold Kernel
@@ -12,6 +13,8 @@
         IDT
         CPU instructions
         FPU
+        PCI
+        ACPI
 */
 
 // GDT Stuff
@@ -434,6 +437,25 @@ static inline void fxsave(void *area) {
 static inline void fxrstor(void *area) {
     asm volatile("fxrstor (%0)" : : "r"(area) : "memory");
 }
+
+// PCI Stuff
+
+typedef struct {
+    uint16_t segment;
+    uint8_t bus;
+    uint8_t slot;
+    uint8_t function;
+    int64_t listIndex;
+} pci_device_t;
+
+void initPCI();
+void addPCIDevice(pci_device_t *device);
+void removePCIDevice(pci_device_t *device);
+uint8_t readPCIConfig8(pci_device_t *device, size_t offset);
+uint16_t readPCIConfig16(pci_device_t *device, size_t offset);
+uint32_t readPCIConfig32(pci_device_t *device, size_t offset);
+
+// ACPI STUFF
 
 
 #endif
