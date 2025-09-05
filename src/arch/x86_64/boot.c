@@ -31,6 +31,12 @@ static volatile struct limine_kernel_address_request kernel_address_request = {
     .revision = 0
 };
 
+__attribute__((used, section(".limine_requests")))
+static volatile struct limine_rsdp_request rsdp_request = {
+    .id = LIMINE_RSDP_REQUEST,
+    .revision = 0
+};
+
 __attribute__((used, section(".limine_requests_end")))
 static volatile LIMINE_REQUESTS_END_MARKER;
 
@@ -55,12 +61,21 @@ void _start() {
     printf("Initializing IDT\n");
     initIDT();
     printf("IDT Initialized\n");
+    printf("Initializing Timer\n");
+    initTimer();
+    printf("Timer Initialized\n");
     printf("Initializing PMM\n");
     initPMM(memmap_request.response, hhdm_request.response->offset);
     printf("PMM Initialized\n");
     printf("Initializing VMM\n");
     initVMM(memmap_request.response, kernel_address_request.response);
     printf("VMM Initialized\n");
+    printf("Initializing PCI\n");
+    initPCI();
+    printf("PCI Initialized\n");
+    printf("Initializing ACPI\n");
+    initACPI((uint64_t)rsdp_request.response->address);
+    printf("ACPI Initialized\n");
 
     kmain();
 }

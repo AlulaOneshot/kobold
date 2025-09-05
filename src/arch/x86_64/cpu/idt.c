@@ -247,6 +247,7 @@ void commonISRHandler(isr_registers_t* regs) {
         crashISRHandler(regs);
     }
     else if (regs->interrupt == 32) {
+        timerTick();
         sendEOI(0);
     }
     else if (regs->interrupt == 33) {

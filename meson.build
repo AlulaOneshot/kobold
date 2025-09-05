@@ -98,6 +98,7 @@ arch_src = {
     'src/arch/x86_64/mm/alloc.c',
     'src/arch/x86_64/cpu/acpi.c',
     'src/arch/x86_64/cpu/pci.c',
+    'src/arch/x86_64/cpu/time.c',
   ] + bitmap_sources + uacpi_sources
   ,
   'aarch64': [

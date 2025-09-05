@@ -87,7 +87,46 @@ uint32_t readPCIConfig32(pci_device_t *device, size_t offset) {
 }
 
 void writePCIConfig8(pci_device_t *device, size_t offset, uint8_t value) {
-    uint32_t original = readPCIConfig32(device, offset);
+    uint32_t current = readPCIConfig32(device, offset & ~3);
+    switch (offset & 3) {
+        case 0:
+            current = (current & 0xFFFFFF00) | (uint32_t)value;
+            break;
+        case 1:
+            current = (current & 0xFFFF00FF) | ((uint32_t)value << 8);
+            break;
+        case 2:
+            current = (current & 0xFF00FFFF) | ((uint32_t)value << 16);
+            break;
+        case 3:
+            current = (current & 0x00FFFFFF) | ((uint32_t)value << 24);
+            break;
+    }
+    writePCIConfig32(device, offset & ~3, current);
+}
 
-    
+void writePCIConfig16(pci_device_t *device, size_t offset, uint16_t value) {
+    uint32_t current = readPCIConfig32(device, offset & ~2);
+    if (offset & 2) {
+        current = (current & 0x0000FFFF) | ((uint32_t)value << 16);
+    } else {
+        current = (current & 0xFFFF0000) | (uint32_t)value;
+    }
+    writePCIConfig32(device, offset & ~2, current);
+}
+
+void writePCIConfig32(pci_device_t *device, size_t offset, uint32_t value) {
+    uint32_t address;
+    uint32_t lbus = (uint32_t)device->bus;
+    uint32_t lslot = (uint32_t)device->slot;
+    uint32_t lfunc = (uint32_t)device->function;
+
+    // IDK what this does, but elysium-os/cronus does it
+    address = (offset & 0xFC) | (1 << 31);
+    address |= lbus << 16;
+    address |= (lslot & 0x1F) << 11;
+    address |= (lfunc & 0x07) << 8;
+    outl(PCI_CONFIG_ADDRESS_PORT, address);
+
+    outl(PCI_CONFIG_DATA_PORT, value);
 }

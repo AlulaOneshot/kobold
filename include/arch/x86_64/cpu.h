@@ -13,6 +13,7 @@
         IDT
         CPU instructions
         FPU
+        Timer (With PIT, HPET, whatever)
         PCI
         ACPI
 */
@@ -438,6 +439,15 @@ static inline void fxrstor(void *area) {
     asm volatile("fxrstor (%0)" : : "r"(area) : "memory");
 }
 
+// Timer stuff
+
+#define TIMER_TIMEPERTICK 1000 // In Hz
+
+void initTimer();
+void timerTick();
+uint64_t getTime(); // In milliseconds since boot
+void sleep(uint64_t ms);
+
 // PCI Stuff
 
 typedef struct {
@@ -454,8 +464,12 @@ void removePCIDevice(pci_device_t *device);
 uint8_t readPCIConfig8(pci_device_t *device, size_t offset);
 uint16_t readPCIConfig16(pci_device_t *device, size_t offset);
 uint32_t readPCIConfig32(pci_device_t *device, size_t offset);
+void writePCIConfig8(pci_device_t *device, size_t offset, uint8_t value);
+void writePCIConfig16(pci_device_t *device, size_t offset, uint16_t value);
+void writePCIConfig32(pci_device_t *device, size_t offset, uint32_t value);
 
 // ACPI STUFF
 
+void initACPI(uint64_t rsdpAddress);
 
 #endif

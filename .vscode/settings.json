@@ -1,5 +1,5 @@
 {
-    "C_Cpp.default.compileCommands": "/Users/alula/Documents/kobold/builddir/compile_commands.json",
+    "C_Cpp.default.compileCommands": "/workspaces/kobold/builddir/compile_commands.json",
     "C_Cpp.default.configurationProvider": "mesonbuild.mesonbuild",
     "files.associations": {
         "kmain.h": "c",
@@ -13,7 +13,8 @@
         "mm.h": "c",
         "functional": "c",
         "utilities.h": "c",
-        "kernel_api.h": "c"
+        "kernel_api.h": "c",
+        "helpers.h": "c"
     },
     "mesonbuild.configureOnOpen": true
 }

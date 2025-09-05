@@ -7,13 +7,29 @@ Initializing GDT
 GDT Initialized
 Initializing IDT
 IDT Initialized
+Initializing Timer
+Timer Initialized
 Initializing PMM
 Got 16 memory map entries
-Highest address: 0xf62000
-Bitmap size: 4096 bytes (1 pages)
+Highest address: 0x1ff62000
+Bitmap size: 16384 bytes (4 pages)
 Placed bitmap at 0x52000
-Found 3723 free pages
+Found 130486 free pages
 PMM Initialized
 Initializing VMM
-Physical address of dataStart: 0xf2a000
+Physical address of dataStart: 0x1fe8e000
 VMM Initialized
+Initializing PCI
+PCI Initialized
+Initializing ACPI
+[UACPI INFO] starting uACPI, version 3.1.0
+Mapping virtual FFFF7FFFFFFFFFFF to phys 00000000000F5000 with flags 3
+Page Fault Interrupt
+Crash! Interrupt: 14, Error: 0
+Spilling registers:
+RAX: ffff8000000002bf RBX: 0000000000000000 RCX: ffffffff80031c8d RDX: ffff8000000002bf
+RSI: ffffffff80031c8d RDI: ffff8000000002bf RBP: ffff80001ff8ae90
+R8 : ffffffff80002870 R9 : 0000000000000001 R10: ffff80001ff8ac17 R11: 0000000000000010
+R12: 0000000000000000 R13: 0000000000000000 R14: 0000000000000000 R15: 0000000000000000
+CS: 0000000000000008 RIP: ffffffff80030a11 RFLAGS: 0000000000000282
+SS: 0000000000000010 RSP: ffff80001ff8ae58

@@ -89,6 +89,8 @@ void vmMapPage(pagemap_t *map, void *virtual, uint64_t phys, uint64_t flag_mask)
         printf("vmMapPage: Virtual address %p is already mapped!\n", virtual);
     }
 
+    printf("Mapping virtual %p to phys %p with flags %llx\n", virtual, (void *)phys, flag_mask);
+
     (*pt)[ptIndex] = entry | PAGE_PRESENT;
 }
 
@@ -235,11 +237,11 @@ void *vmGetSpace(uint64_t physicalAddress, uint64_t size) {
         }
     }
     uint64_t range = 0;
-    for (uint64_t i = 0x1000; i < 0xFFFFFFFFFFFFF000; i += PAGE_SIZE) {
+    for (uint64_t i = 0xFFFF800000000000; i < 0xFFFFFFFFFFFFF000; i += PAGE_SIZE) {
         if (!vmIsMapped(kernelPML4, (void *)i)) {
             range += 1;
             if (range * PAGE_SIZE >= pages * PAGE_SIZE) {
-                vmMapRange(kernelPML4, (void *)(i - range), physicalAddress, pages * PAGE_SIZE, PAGE_WRITABLE);
+                vmMapRange(kernelPML4, (void *)(i - range), physicalAddress, pages * PAGE_SIZE, PAGE_WRITABLE | PAGE_PRESENT);
                 return (void *)(i - range);
             }
         } else {
