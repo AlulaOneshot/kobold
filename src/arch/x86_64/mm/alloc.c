@@ -33,6 +33,10 @@ void *malloc(size_t size) {
 }
 
 void free(void *addr) {
+    if (addr == NULL) {
+        return;
+    }
+
     uint64_t numAddr = (uint64_t)addr;
     slab_t *current = first;
     while (current) {
@@ -61,6 +65,8 @@ void free(void *addr) {
                 bitmapClearBit(current->freeMap, offset / current->blockSize);
                 current = NULL;
             }
+            return;
         }
+        current = current->next;
     }
 }

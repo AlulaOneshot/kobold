@@ -2,6 +2,11 @@
 #include <arch/x86_64/mm.h>
 #include <uacpi/kernel_api.h>
 #include <uacpi/uacpi.h>
+#include <uacpi/acpi.h>
+#include <uacpi/sleep.h>
+#include <uacpi/resources.h>
+#include <uacpi/tables.h>
+#include <uacpi/utilities.h>
 
 // We start With UACPI Glue
 
@@ -22,7 +27,7 @@ void *uacpi_kernel_map(uacpi_phys_addr addr, uacpi_size len) {
     len = ALIGN_UP(len, PAGE_SIZE);
 
     uint64_t vaddr = (uint64_t)vmGetSpace(aligned, len);
-    if (!vaddr) return NULL;
+    if (vaddr == 0) return NULL;
 
     // Return pointer adjusted for the original physical offset
     return (void *)(vaddr + (originalAddr - aligned));
@@ -323,10 +328,12 @@ uacpi_status uacpi_kernel_handle_firmware_request(uacpi_firmware_request *reques
 }
 
 uacpi_status uacpi_kernel_install_interrupt_handler(uacpi_u32 irq, uacpi_interrupt_handler handler, uacpi_handle ctx, uacpi_handle *out_irq_handle) {
+    printf("UNIMPLIMENTED:\n");
     return UACPI_STATUS_UNIMPLEMENTED; // TODO: Implement this
 }
 
 uacpi_status uacpi_kernel_uninstall_interrupt_handler(uacpi_interrupt_handler handler, uacpi_handle irq_handle) {
+    printf("UNIMPLIMENTED:\n");
     return UACPI_STATUS_UNIMPLEMENTED; // TODO: Implement this
 }
 
@@ -360,12 +367,14 @@ void uacpi_kernel_unlock_spinlock(uacpi_handle handle, uacpi_cpu_flags flags) {
 }
 
 uacpi_status uacpi_kernel_schedule_work(uacpi_work_type type, uacpi_work_handler handler, uacpi_handle ctx) {
+    printf("UNIMPLIMENTED:\n");
     // Implementation goes here
     return UACPI_STATUS_UNIMPLEMENTED;
 }
 
 uacpi_status uacpi_kernel_wait_for_work_completion(void) {
     // Implementation goes here
+    printf("UNIMPLIMENTED:\n");
     return UACPI_STATUS_UNIMPLEMENTED;
 }
 
@@ -380,4 +389,6 @@ void initACPI(uint64_t rsdp) {
             asm volatile ("hlt");
         }
     }
+
+    ret = uacpi_namespace_load();
 }

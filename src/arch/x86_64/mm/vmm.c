@@ -15,6 +15,7 @@ uint64_t mapsCount = 0; // Starts at 0
 uint64_t mapsCapacity = 0;
 
 static void vmEnsureCapacity(vmmaps_t ***mapsPtr, uint64_t *mapsCapacity, uint64_t countNeeded) {
+    printf("vmEnsureCapacity called: mapsPtr: %p, mapsCapacity: %llx, countNeeded: %llx\n", mapsPtr, *mapsCapacity, countNeeded);
     if (*mapsCapacity >= countNeeded) {
         return; // enough space already
     }
@@ -24,28 +25,33 @@ static void vmEnsureCapacity(vmmaps_t ***mapsPtr, uint64_t *mapsCapacity, uint64
         newCap = countNeeded; // make sure it's enough
     }
 
-    // Allocate new array
-    vmmaps_t **newMaps = (vmmaps_t **)((uint64_t)pmAlloc(sizeof(vmmaps_t *) * newCap) + hhdmOffset);
-    if (!newMaps) {
-        printf("vmEnsureCapacity: Failed to allocate vmmaps array\n");
+    uint64_t phys = (uint64_t)pmAlloc(sizeof(vmmaps_t *) * newCap);
+    if (phys == 0) {
+        printf("vmEnsureCapacity: pmAlloc failed\n");
+        return;
     }
 
+    vmmaps_t **newMaps = (vmmaps_t **)(phys + hhdmOffset);
+
     // Copy old entries if any
-    if (*mapsPtr) {
+    if (*mapsPtr && *mapsCapacity) {
         memcpy(newMaps, *mapsPtr, sizeof(vmmaps_t *) * (*mapsCapacity));
         pmFree((void *)((uint64_t)*mapsPtr - hhdmOffset), sizeof(vmmaps_t *) * (*mapsCapacity));
     }
 
     *mapsPtr = newMaps;
     *mapsCapacity = newCap;
+    printf("Exiting vmEnsureCapacity\n");
 }
 
 static pagemap_t *vmMapsFindFreeSlot(vmmaps_t *maps[], uint64_t mapsCount) {
+    printf("vmMapsFindFreeSlot called: maps: %p, mapsCount: %llx\n", maps, mapsCount);
     if (mapsCount == 0) return NULL;
     for (uint64_t x = 0; x < mapsCount; x++) {
         for (uint64_t i = 0; i < VMMAPS_MAPS; i++) {
             if (bitmapGetBit(maps[x]->avalibleMaps, i) == 0) {
                 bitmapSetBit(maps[x]->avalibleMaps, i);
+                printf("Exiting vmMapsFindFreeSlot: returned %p\n", &maps[x]->pagemaps[i]);
                 return &maps[x]->pagemaps[i];
             }
         }
@@ -54,6 +60,7 @@ static pagemap_t *vmMapsFindFreeSlot(vmmaps_t *maps[], uint64_t mapsCount) {
 }
 
 static pagemap_t *vmGetOrAllocTable(pagemap_t *parent, uint64_t index, uint64_t flags) {
+    printf("vmGetOrAllocTable: parent: %p, index: %llx, flags: %llx\n", parent, index, flags);
     vmEnsureCapacity(&kernelMaps, &mapsCapacity, mapsCount + 1);
     if (!((uint64_t)((*parent)[index]) & PAGE_PRESENT)) {
         pagemap_t *freetable = vmMapsFindFreeSlot(kernelMaps, mapsCount);
@@ -68,10 +75,12 @@ static pagemap_t *vmGetOrAllocTable(pagemap_t *parent, uint64_t index, uint64_t 
         }
         (*parent)[index] = ((uint64_t)freetable - hhdmOffset) | flags | PAGE_PRESENT;
     }
+    printf("Exiting vmGetOrAllocTable: %p\n", (pagemap_t *)(((uint64_t)(*parent)[index] & PTE_ADDR_MASK) + hhdmOffset));
     return (pagemap_t *)(((uint64_t)(*parent)[index] & PTE_ADDR_MASK) + hhdmOffset);
 }
 
 void vmMapPage(pagemap_t *map, void *virtual, uint64_t phys, uint64_t flag_mask) {
+    printf("vmMapPage: map: %p, virtual: %p, phys: %llx, flag_mask: %llx\n", map, virtual, phys, flag_mask);
     uint64_t entry = (phys & PTE_ADDR_MASK) | flag_mask;
     uint64_t pml4Index = ((uint64_t)virtual >> 39) & 0x1FF;
     uint64_t pdptIndex = ((uint64_t)virtual >> 30) & 0x1FF;
@@ -86,15 +95,17 @@ void vmMapPage(pagemap_t *map, void *virtual, uint64_t phys, uint64_t flag_mask)
 
     if (((*pt)[ptIndex]) & PAGE_PRESENT) {
         // Already mapped
-        printf("vmMapPage: Virtual address %p is already mapped!\n", virtual);
+        printf("vmMapPage: Virtual address %p is already mapped!\n\n", virtual);
     }
 
-    printf("Mapping virtual %p to phys %p with flags %llx\n", virtual, (void *)phys, flag_mask);
+    (*pt)[ptIndex] = entry;
 
-    (*pt)[ptIndex] = entry | PAGE_PRESENT;
+    printf("Exiting vmMapPage\n");
 }
 
 void vmUnmapPage(pagemap_t *map, void *virtual) {
+    printf("vmUnmapPage: map: %p, virtual: %p\n", map, virtual);
+
     uint64_t pml4Index = ((uint64_t)virtual >> 39) & 0x1FF;
     uint64_t pdptIndex = ((uint64_t)virtual >> 30) & 0x1FF;
     uint64_t pdIndex   = ((uint64_t)virtual >> 21) & 0x1FF;
@@ -121,20 +132,27 @@ void vmUnmapPage(pagemap_t *map, void *virtual) {
 
     (*pt)[ptIndex] = 0; // Unmap
     __asm__ volatile("invlpg (%0)" ::"r"(virtual) : "memory");
+    printf("Exiting vmUnmapPage\n");
 }
 
 void vmMapRange(pagemap_t *map, void *virtual, uint64_t phys, uint64_t size, uint64_t flag_mask) {
+    printf("vmMapRange: map: %p, virtual: %p, phys: %llx, size: %llx, flag_mask: %llx\n", map, virtual, phys, size, flag_mask);
     uint64_t pages = (size + PAGE_SIZE - 1) / PAGE_SIZE;
-    for (uint64_t i = 0; i < pages; i++) {
-        vmMapPage(map, (void *)((uint64_t)virtual + i * PAGE_SIZE), phys + i * PAGE_SIZE, flag_mask);
+    uintptr_t va = (uintptr_t)virtual;
+    for (uint64_t p = 0; p < pages; p++) {
+        vmMapPage(map, (void *)(va + p * PAGE_SIZE), phys + p * PAGE_SIZE, flag_mask);
     }
+    printf("Exiting vmMapRange\n");
 }
 
 void vmUnmapRange(pagemap_t *map, void *virtual, uint64_t size) {
+    printf("vmUnmapRange: map: %p, virtual: %p, size: %llx\n", map, virtual, size);
     uint64_t pages = (size + PAGE_SIZE - 1) / PAGE_SIZE;
-    for (uint64_t i = 0; i < pages; i++) {
-        vmUnmapPage(map, (void *)((uint64_t)virtual + i * PAGE_SIZE));
+    uintptr_t va = (uintptr_t)virtual;
+    for (uint64_t p = 0; p < pages; p++) {
+        vmUnmapPage(map, (void *)(va + p * PAGE_SIZE));
     }
+    printf("Exiting vmUnmapRange\n");
 }
 
 bool vmIsMapped(pagemap_t *map, void *virtual) {
@@ -229,6 +247,7 @@ void vmModifyFlags(pagemap_t *map, void *virtual, uint64_t flag_mask, bool set) 
 
 void *vmGetSpace(uint64_t physicalAddress, uint64_t size) {
     uint64_t pages = (size + PAGE_SIZE - 1) / PAGE_SIZE;
+
     if (physicalAddress == 0) {
         physicalAddress = (uint64_t)pmAlloc(pages * PAGE_SIZE);
         if (physicalAddress == 0) {
@@ -236,18 +255,27 @@ void *vmGetSpace(uint64_t physicalAddress, uint64_t size) {
             return NULL;
         }
     }
-    uint64_t range = 0;
-    for (uint64_t i = 0xFFFF800000000000; i < 0xFFFFFFFFFFFFF000; i += PAGE_SIZE) {
-        if (!vmIsMapped(kernelPML4, (void *)i)) {
-            range += 1;
-            if (range * PAGE_SIZE >= pages * PAGE_SIZE) {
-                vmMapRange(kernelPML4, (void *)(i - range), physicalAddress, pages * PAGE_SIZE, PAGE_WRITABLE | PAGE_PRESENT);
-                return (void *)(i - range);
+
+    uint64_t contiguous = 0;
+    uintptr_t startCandidate = 0;
+
+    uintptr_t searchStart = 0xFFFF800000000000ULL;
+    uintptr_t searchEnd   = 0xFFFFFFFFFFFFF000ULL;
+
+    for (uintptr_t a = searchStart; a < searchEnd; a += PAGE_SIZE) {
+        if (!vmIsMapped(kernelPML4, (void*)a)) {
+            if (contiguous == 0)startCandidate = a;
+            contiguous++;
+            if (contiguous >= pages) {
+                vmMapRange(kernelPML4, (void *)startCandidate, physicalAddress, pages * PAGE_SIZE, PAGE_WRITABLE | PAGE_PRESENT);
+                return (void *)startCandidate;
             }
-        } else {
-            range = 0;
+        }
+        else {
+            contiguous = 0;
         }
     }
+
     printf("vmGetSpace: Failed to find a large enough virtual memory range\n");
     return NULL;
 }

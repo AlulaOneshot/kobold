@@ -16,6 +16,7 @@
         Timer (With PIT, HPET, whatever)
         PCI
         ACPI
+        Stack
 */
 
 // GDT Stuff
@@ -471,5 +472,11 @@ void writePCIConfig32(pci_device_t *device, size_t offset, uint32_t value);
 // ACPI STUFF
 
 void initACPI(uint64_t rsdpAddress);
+
+// Make the Stack Larger
+
+static inline void initStack() {
+    uint64_t 
+}
 
 #endif
