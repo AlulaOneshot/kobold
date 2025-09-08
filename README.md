@@ -30,7 +30,7 @@ To run your image, you must run a different command depending on what architectu
 
 ### x86_64
 ```bash
-qemu-system-x86_64 -cdrom builddir/image.iso -chardev stdio,id=char0,logfile=serial.log -serial chardev:char0 -display none -m 512M -M pc-q35-8.2
+qemu-system-x86_64 -cdrom builddir/image.iso -display none -debugcon stdio
 ```
 
 ### aarch64

@@ -6,21 +6,6 @@
 #include <cpu.h>
 #include <limine.h>
 
-extern size_t currentCPU;
-
-typedef struct x86_64_cpu {
-    struct x86_64_cpu *self;
-    size_t id;
-    uint32_t lapicID;
-    uint64_t lapicTimerFrequency;
-    uint64_t tscTimerFrequency;
-    //tss_t *tss;
-    //thread_t *currentThread;
-
-    cpu_t common;
-} x86_64_cpu_t;
-
-void initialiseLocalCPU(x86_64_cpu_t *cpu, size_t id);
 void initialiseCPU();
 
 /// @brief Output a byte to a port.

@@ -286,7 +286,7 @@ void printStackTrace(debugStackFrame_t *initialFrame) {
 }
 
 void exceptionUnhandled(isr_registers_t* regs) {
-    printf("Unhandled Exception: (Interrupt %d) On CPU %d\n", regs->interrupt, currentCPU);
+    printf("Unhandled Exception: (Interrupt %d)\n", regs->interrupt);
 
     debugStackFrame_t initialStackFrame;
     initialStackFrame.rbp = (debugStackFrame_t *)regs->rbp;
