@@ -15,7 +15,11 @@
         "utilities.h": "c",
         "kernel_api.h": "c",
         "helpers.h": "c",
-        "resources.h": "c"
+        "resources.h": "c",
+        "dev.h": "c",
+        "memory.h": "c",
+        "bitmaps.h": "c",
+        "sys.h": "c"
     },
     "mesonbuild.configureOnOpen": true
 }

@@ -1,2 +1,0 @@
-+set logging file gdb_functions.log
-+set logging enabled off

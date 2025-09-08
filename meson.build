@@ -9,6 +9,9 @@ uacpi = subproject('uacpi')
 uacpi_sources = uacpi.get_variable('sources')
 uacpi_includes = uacpi.get_variable('includes')
 
+libk = subproject('libk')
+libk_dep = libk.get_variable('libk_dep')
+
 # Getting configs
 supported_archs = ['x86_64', 'aarch64', 'riscv64']
 
@@ -23,9 +26,6 @@ target_arch = host_machine.cpu_family()
 if target_arch not in supported_archs
     error('Unsupported architecture: ' + target_arch)
 endif
-
-libk_sp = subproject('libk')
-libk_dep = libk_sp.get_variable('libk_dep')
 
 message('Building for architecture: @0@'.format(target_arch))
 
@@ -52,13 +52,14 @@ config = arch_configs[target_arch]
 common_cflags = [
   '-ffreestanding',
   '-fno-stack-protector',
+  '-fno-omit-frame-pointer',
   '-fno-pic',
   '-fno-pie',
   '-nostdlib',
   '-nostdinc',
   '-Wall',
   '-Wextra',
-  '-Wno-unused-parameter',
+  '-Wno-unused-parameter'
 ]
 
 cflags = common_cflags + config['cflags']
@@ -81,25 +82,28 @@ includes = [include_directories([
 
 common_src = [
   'src/kmain.c',
+  'src/cpu/init.c',
 ]
 
 arch_src = {
   'x86_64': [
     'src/arch/x86_64/boot.c',
+    'src/arch/x86_64/cpu/init.c',
+    'src/arch/x86_64/cpu/interrupts.c',
+    'src/arch/x86_64/cpu/isr.s',
     'src/arch/x86_64/cpu/gdt.c',
     'src/arch/x86_64/cpu/gdt.s',
-    'src/arch/x86_64/cpu/idt.c',
-    'src/arch/x86_64/cpu/isr.s',
-    'src/arch/x86_64/serial.c',
-    'src/arch/x86_64/printf.c',
-    'src/arch/x86_64/mm/pmm.c',
-    'src/arch/x86_64/mm/vmm.c',
     'src/arch/x86_64/cpu/fpu.c',
-    'src/arch/x86_64/mm/alloc.c',
-    'src/arch/x86_64/cpu/acpi.c',
-    'src/arch/x86_64/cpu/pci.c',
-    'src/arch/x86_64/cpu/time.c',
-  ] + bitmap_sources + uacpi_sources
+    'src/arch/x86_64/dev/qemu-debug.c',
+    'src/arch/x86_64/printf.c',
+    'src/memory/physical.c',
+    'src/memory/virtual.c',
+    'src/arch/x86_64/cpu/mmu.c',
+    'src/memory/alloc.c',
+    'src/sys/list.c',
+    'src/sys/defferedWork.c',
+    'src/cpu/interrupts.c',
+  ] + bitmap_sources #+ uacpi_sources
   ,
   'aarch64': [
     'src/arch/aarch64/boot.c',
