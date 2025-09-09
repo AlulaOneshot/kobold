@@ -83,7 +83,6 @@ common_src = [
 
 arch_src = {
   'x86_64': [
-    # Temporary while working on libk
     # 'src/arch/x86_64/boot.c',
     # 'src/arch/x86_64/cpu/init.c',
     # 'src/arch/x86_64/cpu/interrupts.c',

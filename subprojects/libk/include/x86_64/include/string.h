@@ -12,13 +12,13 @@ int memcmp (const void *, const void *, size_t);
 void *memchr (const void *, int, size_t);
 
 char *strcpy(char *restrict dest, const char *restrict src);
-char *strncpy (char *__restrict, const char *__restrict, size_t);
+char *strncpy(char *restrict d, const char *restrict s, size_t n);
 
-char *strcat (char *__restrict, const char *__restrict);
-char *strncat (char *__restrict, const char *__restrict, size_t);
+char *strcat(char *restrict dest, const char *restrict src);
+char *strncat(char *restrict d, const char *restrict s, size_t n);
 
-int strcmp (const char *, const char *);
-int strncmp (const char *, const char *, size_t);
+int strcmp(const char *l, const char *r);
+int strncmp(const char *_l, const char *_r, size_t n);
 
 int strcoll (const char *, const char *);
 size_t strxfrm (char *__restrict, const char *__restrict, size_t);

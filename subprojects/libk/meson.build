@@ -64,6 +64,13 @@ src = {
     'src/arch/x86_64/string/memchr.c',
 
     'src/arch/x86_64/string/strcpy.c',
+    'src/arch/x86_64/string/strncpy.c',
+
+    'src/arch/x86_64/string/strcat.c',
+    'src/arch/x86_64/string/strncat.c',
+  
+    'src/arch/x86_64/string/strcmp.c',
+    'src/arch/x86_64/string/strncmp.c',
   ],
   'aarch64': [
     

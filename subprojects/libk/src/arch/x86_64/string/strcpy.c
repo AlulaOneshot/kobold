@@ -6,6 +6,7 @@
 #define ALIGN (sizeof(size_t))
 #define ONES ((size_t)-1/UCHAR_MAX)
 #define HIGHS (ONES * (UCHAR_MAX/2+1))
+#pragma GCC diagnostic ignored "-Wparentheses"
 #define HASZERO(x) ((x)-ONES & ~(x) & HIGHS)
 
 char *strcpy(char *restrict dest, const char *restrict src)
