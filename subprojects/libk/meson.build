@@ -1,5 +1,8 @@
 project('kobold-libk', 'c', version: '0.1.0', license: 'MPL-2.0-or-later')
 
+# Huge thanks to MUSL for their libc implementation which this is heavily based on
+# Thanks to GLIBC for Headers
+
 target_arch = host_machine.cpu_family()
 
 arch_configs = {
@@ -54,12 +57,13 @@ includes = include_directories([
 
 src = {
   'x86_64': [
-    'src/arch/x86_64/stdlib/abort.c',
     'src/arch/x86_64/string/memcmp.c',
     'src/arch/x86_64/string/memcpy.c',
     'src/arch/x86_64/string/memmove.c',
     'src/arch/x86_64/string/memset.c',
-    'src/arch/x86_64/string/strlen.c',
+    'src/arch/x86_64/string/memchr.c',
+
+    'src/arch/x86_64/string/strcpy.c',
   ],
   'aarch64': [
     
