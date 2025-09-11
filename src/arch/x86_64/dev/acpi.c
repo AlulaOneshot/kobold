@@ -14,7 +14,14 @@ void initialiseACPI(uint64_t rsdpPhysicalAddr) {
     rsdpAddress = rsdpPhysicalAddr;
 
     uacpi_status status = uacpi_initialize(0);
-    if (status != UACPI_STATUS_OK) {
+    if (uacpi_unlikely_error(status)) {
+        printf("ACPI initialization failed");
+        asm volatile("cli");
+        while (1) asm volatile("hlt");
+    }
+
+    status = uacpi_namespace_load();
+    if (uacpi_unlikely_error(status)) {
         printf("ACPI initialization failed");
         asm volatile("cli");
         while (1) asm volatile("hlt");

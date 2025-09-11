@@ -55,6 +55,8 @@ static volatile LIMINE_REQUESTS_END_MARKER;
 /// @brief Physical Address of the RSDP
 uint64_t rsdpAddress;
 
+extern void setupNewStack(void *stackStart) __attribute__((noreturn));
+
 void _start() {
     initialiseCPU();
     
@@ -64,6 +66,17 @@ void _start() {
     initialisePMM(memmap_request.response);
     initialiseVMM(memmap_request.response, kernel_address_request.response);
     initialiseAllocator();
+
+    void *stack = (void*)((((uint64_t)vmGetSpace(pmmAlloc(256), 256) + (256 * PAGE_SIZE)) & ~((uintptr_t)0xF))-8);
+
+    memset(stack, 0, 256 * PAGE_SIZE);
+
+    printf("Jumping to new stack at %p\n", stack);
+
+    setupNewStack(stack);
+}
+
+void initStage2() {
     initialiseFPU();
 
     printf("Initialising Deffered Work System\n");

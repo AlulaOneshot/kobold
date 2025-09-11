@@ -25,7 +25,8 @@
         "alltypes.h": "c",
         "string.h": "c",
         "uacpi.h": "c",
-        "time.h": "c"
+        "time.h": "c",
+        "mutex.h": "c"
     },
     "mesonbuild.configureOnOpen": true
 }

@@ -94,6 +94,7 @@ arch_src = {
     'src/arch/x86_64/cpu/isr.s',
     'src/arch/x86_64/cpu/gdt.c',
     'src/arch/x86_64/cpu/gdt.s',
+    'src/arch/x86_64/cpu/stack.s',
     'src/arch/x86_64/cpu/fpu.c',
     'src/arch/x86_64/dev/qemu-debug.c',
     'src/arch/x86_64/dev/pci.c',
