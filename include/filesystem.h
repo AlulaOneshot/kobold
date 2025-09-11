@@ -58,6 +58,12 @@ typedef ssize_t (*vfs_make_dir_handler_t)(vfs_node_t *parent, const char *name, 
 /// @return 0 on success, or a negative error code
 typedef ssize_t (*vfs_make_file_handler_t)(vfs_node_t *parent, const char *name, uint16_t permissions);
 
+/// @brief Mounts a filesystem as a child of a directory node in the VFS. Note that this is to be implemented by the filesystem being mounted itself, not the VFS.
+/// @param parent The parent directory node to mount the filesystem on
+/// @param name The name of the mount point
+/// @return 0 on success, or a negative error code
+typedef ssize_t (*vfs_mount_filesystem_handler_t)(vfs_node_t *parent, const char *name);
+
 typedef struct {
     vfs_read_handler_t read;
     vfs_write_handler_t write;
@@ -67,6 +73,7 @@ typedef struct {
     vfs_delete_handler_t delete;
     vfs_make_dir_handler_t makeDir;
     vfs_make_file_handler_t makeFile;
+    vfs_mount_filesystem_handler_t mountFilesystem;
 } vfs_operations_t;
 
 typedef enum {
@@ -77,10 +84,17 @@ typedef enum {
     VFS_NODE_TYPE_BLOCK_DEVICE
 } vfs_node_type_t;
 
+typedef enum {
+    VFS_FILESYSTEM_TYPE_DEVFS,
+    VFS_FILESYSTEM_TYPE_VFS,
+    VFS_FILESYSTEM_TYPE_UNKNOWN
+} vfs_filesystem_t;
+
 typedef struct vfs_node {
     char name[256];
     uint16_t permissions;
     vfs_node_type_t type;
+    vfs_filesystem_t filesystem; // The filesystem this node belongs to
     vfs_operations_t *operations;
     struct vfs_node *parent; // Pointer to parent node, NULL if root. Note that NULL means this node IS the root, not a child of root.
     list_t *children;   // List of child nodes, only valid if type is VFS_NODE_TYPE_DIRECTORY
@@ -100,10 +114,38 @@ typedef struct {
     vfs_node_t *root;  // The root directory node of the VFS
 } vfs_root_t;
 
+#define VFS_OPERATION_NOT_SUPPORTED -1
+#define VFS_OPERATION_FAILED -2
+#define VFS_FILE_NOT_FOUND -3
+#define VFS_MEMORY_ALLOCATION_FAILED -4
+#define VFS_OPERATION_NOT_IMPLEMENTED -5
+
+ssize_t vfsMakeDir(vfs_node_t *parent, const char *name, uint16_t permissions);
+ssize_t vfsMakeFile(vfs_node_t *parent, const char *name, uint16_t permissions);
+
 /// @brief Initialises the Virtual Filesystem (VFS).
 void initialiseVFS();
+
+static inline const char *getFSString(vfs_filesystem_t fs) {
+    switch (fs) {
+        case VFS_FILESYSTEM_TYPE_DEVFS:
+            return "devfs";
+        case VFS_FILESYSTEM_TYPE_VFS:
+            return "vfs";
+        default:
+            return "unknown";
+    }
+}
 
 /// @brief Resolves a path in the VFS.
 /// @param path The path to resolve
 /// @return A pointer to the resolved vfs_node_t, or NULL if not found
 vfs_node_t *resolvePathVFS(const char *path);
+
+ssize_t devFSRead(vfs_open_file_t *file, uint8_t *out, size_t size, size_t offset);
+ssize_t devFSWrite(vfs_open_file_t *file, const uint8_t *in, size_t size, size_t offset);
+ssize_t devFSSeek(vfs_open_file_t *file, size_t offset);
+ssize_t devFSIoctl(vfs_open_file_t *file, int64_t request, uint64_t arg);
+ssize_t devFSFileSize(vfs_open_file_t *file);
+ssize_t devFSDelete(vfs_node_t *node);
+ssize_t devFSMountFilesystem(vfs_node_t *parent, const char *name);

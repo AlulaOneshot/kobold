@@ -20,6 +20,7 @@ void pmmFree(uint64_t address, size_t pageCount);
 
 void initialiseVMM(struct limine_memmap_response *memmap, struct limine_kernel_address_response *kernelAddressResponse);
 void *vmGetSpace(uint64_t physicalAddress, size_t pageCount);
+void vmFreeSpace(void *virtualAddress, size_t pageCount);
 
 typedef struct slab {
     bitmap_t *freeMap;

@@ -71,6 +71,24 @@ src = {
   
     'src/arch/x86_64/string/strcmp.c',
     'src/arch/x86_64/string/strncmp.c',
+
+    'src/arch/x86_64/string/strcoll.c',
+    'src/arch/x86_64/string/strxfrm.c',
+
+    'src/arch/x86_64/string/strchr.c',
+    'src/arch/x86_64/string/strrchr.c',
+
+    'src/arch/x86_64/string/strcspn.c',
+    'src/arch/x86_64/string/strspn.c',
+    'src/arch/x86_64/string/strpbrk.c',
+    'src/arch/x86_64/string/strstr.c',
+    'src/arch/x86_64/string/strtok.c',
+    
+    'src/arch/x86_64/string/strlen.c',
+
+    'src/arch/x86_64/string/stpcpy.c',
+    'src/arch/x86_64/string/stpncpy.c',
+    'src/arch/x86_64/string/strdup.c',
   ],
   'aarch64': [
     

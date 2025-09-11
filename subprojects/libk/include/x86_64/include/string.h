@@ -20,8 +20,8 @@ char *strncat(char *restrict d, const char *restrict s, size_t n);
 int strcmp(const char *l, const char *r);
 int strncmp(const char *_l, const char *_r, size_t n);
 
-int strcoll (const char *, const char *);
-size_t strxfrm (char *__restrict, const char *__restrict, size_t);
+int strcoll(const char *l, const char *r);
+size_t strxfrm (char *restrict dest, const char *restrict src, size_t n);
 
 char *strchr (const char *, int);
 char *strrchr (const char *, int);
@@ -30,12 +30,12 @@ size_t strcspn (const char *, const char *);
 size_t strspn (const char *, const char *);
 char *strpbrk (const char *, const char *);
 char *strstr (const char *, const char *);
-char *strtok (char *__restrict, const char *__restrict);
+char *strtok(char *restrict s, const char *restrict sep);
 
 size_t strlen (const char *);
 
-char *stpcpy(char *__restrict, const char *__restrict);
-char *stpncpy(char *__restrict, const char *__restrict, size_t);
+char *stpcpy(char *restrict d, const char *restrict s);
+char *stpncpy(char *restrict d, const char *restrict s, size_t n);
 char *strdup (const char *);
 
 #endif

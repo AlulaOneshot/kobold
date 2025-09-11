@@ -17,6 +17,9 @@ void listPush(list_t *list, void *data) {
     if (list->tail) {
         list->tail->next = node;
     }
+    if (!list->head) {
+        list->head = node;
+    }
 
     list->tail = node;
     list->length++;
@@ -39,12 +42,12 @@ list_node_t *listPop(list_t *list) {
 }
 
 list_node_t *listGetNode(list_t *list, size_t index) {
-    if (index > list->length) {
+    if (index >= list->length) {
         return NULL;
     }
 
     list_node_t *current = list->head;
-    for (size_t i = 0; i < index && current != NULL; i++) {
+    for (size_t i = 0; i != index && current != NULL; i++) {
         current = current->next;
     }
 

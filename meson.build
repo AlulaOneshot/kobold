@@ -8,6 +8,10 @@ bitmaps_includes = bitmaps.get_variable('include_directories')
 libk = subproject('libk')
 libk_dep = libk.get_variable('libk_dep')
 
+uacpi = subproject('uacpi')
+uacpi_sources = uacpi.get_variable('sources')
+uacpi_includes = uacpi.get_variable('includes')
+
 # Getting configs
 supported_archs = ['x86_64', 'aarch64', 'riscv64']
 
@@ -74,33 +78,37 @@ defines = config['defines'] + [
 
 includes = [include_directories([
   'include',
-  ])] + bitmaps_includes
+  ])] + bitmaps_includes + uacpi_includes
 
 common_src = [
   'src/kmain.c',
-  # 'src/cpu/init.c',
+  'src/cpu/init.c',
 ]
 
 arch_src = {
   'x86_64': [
-    # 'src/arch/x86_64/boot.c',
-    # 'src/arch/x86_64/cpu/init.c',
-    # 'src/arch/x86_64/cpu/interrupts.c',
-    # 'src/arch/x86_64/cpu/isr.s',
-    # 'src/arch/x86_64/cpu/gdt.c',
-    # 'src/arch/x86_64/cpu/gdt.s',
-    # 'src/arch/x86_64/cpu/fpu.c',
-    # 'src/arch/x86_64/dev/qemu-debug.c',
-    # 'src/arch/x86_64/printf.c',
-    # 'src/memory/physical.c',
-    # 'src/memory/virtual.c',
-    # 'src/arch/x86_64/cpu/mmu.c',
-    # 'src/memory/alloc.c',
-    # 'src/sys/list.c',
-    # 'src/sys/defferedWork.c',
-    # 'src/cpu/interrupts.c',
-    # 'src/filesystem/vfs.c',
-  ] + bitmap_sources #+ uacpi_sources
+    'src/arch/x86_64/boot.c',
+    'src/arch/x86_64/time.c',
+    'src/arch/x86_64/cpu/init.c',
+    'src/arch/x86_64/cpu/interrupts.c',
+    'src/arch/x86_64/cpu/isr.s',
+    'src/arch/x86_64/cpu/gdt.c',
+    'src/arch/x86_64/cpu/gdt.s',
+    'src/arch/x86_64/cpu/fpu.c',
+    'src/arch/x86_64/dev/qemu-debug.c',
+    'src/arch/x86_64/dev/pci.c',
+    'src/arch/x86_64/dev/acpi.c',
+    'src/arch/x86_64/printf.c',
+    'src/memory/physical.c',
+    'src/memory/virtual.c',
+    'src/arch/x86_64/cpu/mmu.c',
+    'src/memory/alloc.c',
+    'src/sys/list.c',
+    'src/sys/defferedWork.c',
+    'src/cpu/interrupts.c',
+    'src/filesystem/vfs.c',
+    'src/filesystem/devfs.c',
+  ] + bitmap_sources + uacpi_sources
   ,
   'aarch64': [
     'src/arch/aarch64/boot.c',

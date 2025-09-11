@@ -1,5 +1,6 @@
 #include <arch/x86_64/cpu.h>
 #include <arch/x86_64/printf.h>
+#include <arch/x86_64/time.h>
 
 idt_entry_t idt[256];
 
@@ -577,6 +578,8 @@ void initialiseIDT() {
         isr_handlers[i].handler = exceptionUnhandled;
     }
 
+    isr_handlers[32].handler = timerTick;
+
     idt_descriptor_t desc = {
         .offset = (uint64_t)&idt[0],
         .size = sizeof(idt_entry_t) * 256
@@ -586,4 +589,115 @@ void initialiseIDT() {
 
 void commonISRHandler(isr_registers_t* regs) {
     isr_handlers[regs->interrupt].handler(regs);
+}
+
+#define PIC1		0x20		/* IO base address for master PIC */
+#define PIC2		0xA0		/* IO base address for slave PIC */
+#define PIC1_COMMAND	PIC1
+#define PIC1_DATA	(PIC1+1)
+#define PIC2_COMMAND	PIC2
+#define PIC2_DATA	(PIC2+1)
+
+#define ICW1_ICW4	0b1		/* Indicates that ICW4 will be present */
+#define ICW1_SINGLE	0b10		/* Single (cascade) mode */
+#define ICW1_INTERVAL4	0b100		/* Call address interval 4 (8) */
+#define ICW1_LEVEL	0b1000		/* Level triggered (edge) mode */
+#define ICW1_INIT	0b10000		/* Initialization - required! */
+
+#define ICW4_8086	0b1		/* 8086/88 (MCS-80/85) mode */
+#define ICW4_AUTO	0b10		/* Auto (normal) EOI */
+#define ICW4_BUF_SLAVE	0b1000		/* Buffered mode/slave */
+#define ICW4_BUF_MASTER	0b1100		/* Buffered mode/master */
+#define ICW4_SFNM	0b10000		/* Special fully nested (not) */
+
+#define CASCADE_IRQ 2
+
+void initPIC();
+void remapPIC(int offset1, int offset2);
+void disablePIC();
+void setPICMask(uint8_t line);
+void clearPICMask(uint8_t line);
+void sendEOI(uint8_t irq);
+
+void initPIC() {
+    outb(PIC1_DATA, 0xFF); // Fully mask interrupts on both PICs
+    ioWait();
+	outb(PIC2_DATA, 0xFF);
+    ioWait();
+
+    remapPIC(0x20, 0x28); // Remap PIC interrupts to 0x20-0x2F
+}
+
+void remapPIC(int offset1, int offset2) {
+    uint8_t a1, a2;
+
+    a1 = inb(PIC1_DATA);                        // save masks
+    ioWait();
+    a2 = inb(PIC2_DATA);
+    ioWait();
+
+    outb(PIC1_COMMAND, ICW1_INIT | ICW1_ICW4);  // starts the initialization sequence (in cascade mode)
+    ioWait();
+    outb(PIC2_COMMAND, ICW1_INIT | ICW1_ICW4);
+    ioWait();
+    outb(PIC1_DATA, offset1);                 // ICW2: Master PIC vector offset
+    ioWait();
+    outb(PIC2_DATA, offset2);                 // ICW2: Slave PIC vector offset
+    ioWait();
+    outb(PIC1_DATA, 4);                       // ICW3: tell Master PIC that there is a slave PIC at IRQ2 (0000 0100)
+    ioWait();
+    outb(PIC2_DATA, 2);                       // ICW3: tell Slave PIC its cascade identity (0000 0010)
+    ioWait();
+
+    outb(PIC1_DATA, ICW4_8086);
+    ioWait();
+    outb(PIC2_DATA, ICW4_8086);
+    ioWait();
+
+    outb(PIC1_DATA, a1);   // restore saved masks.
+    ioWait();
+    outb(PIC2_DATA, a2);
+    ioWait();
+}
+
+void disablePIC() {
+    outb(PIC1_DATA, 0xFF); // Fully mask interrupts on both PICs
+    ioWait();
+    outb(PIC2_DATA, 0xFF);
+    ioWait();
+}
+
+void setPICMask(uint8_t line) {
+    uint16_t port;
+    uint8_t value;
+
+    if(line < 8) {
+        port = PIC1_DATA;
+    } else {
+        port = PIC2_DATA;
+        line -= 8;
+    }
+    value = inb(port) | (1 << line);
+    outb(port, value);   
+}
+
+void clearPICMask(uint8_t line) {
+    uint16_t port;
+    uint8_t value;
+
+    if(line < 8) {
+        port = PIC1_DATA;
+    } else {
+        port = PIC2_DATA;
+        line -= 8;
+    }
+    value = inb(port) & ~(1 << line);
+    outb(port, value);   
+}
+
+void sendEOI(uint8_t irq) {
+    if(irq >= 8) {
+        outb(PIC2_COMMAND, 0x20); // Send reset signal to slave.
+    }
+    outb(PIC1_COMMAND, 0x20); // Send reset signal to master. 
 }

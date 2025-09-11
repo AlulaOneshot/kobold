@@ -23,7 +23,9 @@
         "filesystem.h": "c",
         "stddef.h": "c",
         "alltypes.h": "c",
-        "string.h": "c"
+        "string.h": "c",
+        "uacpi.h": "c",
+        "time.h": "c"
     },
     "mesonbuild.configureOnOpen": true
 }

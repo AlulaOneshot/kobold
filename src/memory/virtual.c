@@ -29,3 +29,11 @@ void *vmGetSpace(uint64_t physicalAddress, size_t pageCount) {
         return virtualAddress;
     #endif
 }
+
+void vmFreeSpace(void *virtualAddress, size_t pageCount) {
+    #if ARCH_X86_64 == 1
+        for (size_t i = 0; i < pageCount; i++) {
+            mmuUnmapPage(kernelPagemap, (void *)((uint64_t)virtualAddress + i * PAGE_SIZE));
+        }
+    #endif
+}

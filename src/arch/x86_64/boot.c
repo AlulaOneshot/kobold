@@ -1,9 +1,11 @@
 #include <kmain.h>
 #include <limine.h>
 #include <arch/x86_64/cpu.h>
+#include <arch/x86_64/dev.h>
 #include <memory.h>
 #include <cpu.h>
 #include <arch/x86_64/printf.h>
+#include <filesystem.h>
 
 __attribute__((used, section(".limine_requests")))
 static volatile LIMINE_BASE_REVISION(3);
@@ -67,6 +69,32 @@ void _start() {
     printf("Initialising Deffered Work System\n");
     initialiseDefferedWork();
     printf("Deffered work initialised\n");
+
+    printf("Initialising PCI\n");
+    initialisePCI();
+    printf("PCI initialised\n");
+
+    printf("Initialising ACPI\n");
+    initialiseACPI(rsdpAddress);
+    printf("ACPI initialised\n");
+
+    printf("Initialising VFS\n");
+    initialiseVFS();
+    printf("VFS initialised\n");
+
+    vfs_node_t *rootNode = resolvePathVFS("/");
+
+    for (size_t i = 0; i < rootNode->children->length; i++) {
+        vfs_node_t *child = (vfs_node_t *)listGetNode(rootNode->children, i)->data;
+        if (child) {
+            printf("Child %zu: %s\n", i, child->name);
+            printf("Type: %s\n", child->type == VFS_NODE_TYPE_DIRECTORY ? "Directory" : "File");
+            printf("Permissions: 0x%X\n", child->permissions);
+            printf("Filesystem: %s\n", getFSString(child->filesystem));
+        }
+    }
+
+    printf("Jumping to kernel main function\n");
 
     kmain();
 }
