@@ -1,2 +1,0 @@
-option('qemu_flags', type: 'string', value: '-m 2G', description: 'QEMU flags to use when running the emulator')
-option('image_name', type: 'string', value: 'image', description: 'The name preceeding .iso for the output image.')

@@ -9,7 +9,7 @@ else
     echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ~/.bashrc
     source ~/.bashrc
 fi
-/home/linuxbrew/.linuxbrew/bin/brew install x86_64-elf-gcc
-/home/linuxbrew/.linuxbrew/bin/brew install aarch64-elf-gcc
-/home/linuxbrew/.linuxbrew/bin/brew install riscv64-elf-gcc
+
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
 echo "Environment Setup Complete. Run `source ~/.bashrc` to update your PATH."
