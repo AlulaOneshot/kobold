@@ -7,6 +7,8 @@ edition = "2024"
 [dependencies]
 limine = "0.5"
 modular-bitfield = "0.12.0"
+spin = "0.10.0"
+lazy_static = { version = "1.4", features = ["spin_no_std"] }
 
 # the profile used for `cargo build`
 [profile.dev]

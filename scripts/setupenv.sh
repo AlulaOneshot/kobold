@@ -1,5 +1,5 @@
 sudo apt-get update
-sudo apt-get install build-essential meson ninja-build xorriso qemu-system qemu-utils
+sudo apt-get install build-essential meson ninja-build xorriso qemu-system qemu-utils -y
 sudo apt-get clean 
 if command -v brew >/dev/null 2>&1; then
     echo "Homebrew is already installed, and will not be reinstalled."
