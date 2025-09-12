@@ -5,6 +5,7 @@
 #include <memory.h>
 #include <cpu.h>
 #include <arch/x86_64/printf.h>
+#include <arch/x86_64/time.h>
 #include <filesystem.h>
 
 __attribute__((used, section(".limine_requests")))
@@ -55,8 +56,6 @@ static volatile LIMINE_REQUESTS_END_MARKER;
 /// @brief Physical Address of the RSDP
 uint64_t rsdpAddress;
 
-extern void setupNewStack(void *stackStart) __attribute__((noreturn));
-
 void _start() {
     initialiseCPU();
     
@@ -67,16 +66,6 @@ void _start() {
     initialiseVMM(memmap_request.response, kernel_address_request.response);
     initialiseAllocator();
 
-    void *stack = (void*)((((uint64_t)vmGetSpace(pmmAlloc(256), 256) + (256 * PAGE_SIZE)) & ~((uintptr_t)0xF))-8);
-
-    memset(stack, 0, 256 * PAGE_SIZE);
-
-    printf("Jumping to new stack at %p\n", stack);
-
-    setupNewStack(stack);
-}
-
-void initStage2() {
     initialiseFPU();
 
     printf("Initialising Deffered Work System\n");
@@ -86,6 +75,10 @@ void initStage2() {
     printf("Initialising PCI\n");
     initialisePCI();
     printf("PCI initialised\n");
+
+    printf("Initialising Time\n");
+    initialiseTime();
+    printf("Time initialised\n");
 
     printf("Initialising ACPI\n");
     initialiseACPI(rsdpAddress);

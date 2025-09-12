@@ -305,6 +305,34 @@ typedef struct {
 
 void initialiseIDT();
 
+#define PIC1		0x20		/* IO base address for master PIC */
+#define PIC2		0xA0		/* IO base address for slave PIC */
+#define PIC1_COMMAND	PIC1
+#define PIC1_DATA	(PIC1+1)
+#define PIC2_COMMAND	PIC2
+#define PIC2_DATA	(PIC2+1)
+
+#define ICW1_ICW4	0b1		/* Indicates that ICW4 will be present */
+#define ICW1_SINGLE	0b10		/* Single (cascade) mode */
+#define ICW1_INTERVAL4	0b100		/* Call address interval 4 (8) */
+#define ICW1_LEVEL	0b1000		/* Level triggered (edge) mode */
+#define ICW1_INIT	0b10000		/* Initialization - required! */
+
+#define ICW4_8086	0b1		/* 8086/88 (MCS-80/85) mode */
+#define ICW4_AUTO	0b10		/* Auto (normal) EOI */
+#define ICW4_BUF_SLAVE	0b1000		/* Buffered mode/slave */
+#define ICW4_BUF_MASTER	0b1100		/* Buffered mode/master */
+#define ICW4_SFNM	0b10000		/* Special fully nested (not) */
+
+#define CASCADE_IRQ 2
+
+void initPIC();
+void remapPIC(int offset1, int offset2);
+void disablePIC();
+void setPICMask(uint8_t line);
+void clearPICMask(uint8_t line);
+void sendEOI(uint8_t irq);
+
 #define makeSegmentSelector(index, table, rpl) (uint16_t)(((uint16_t)index << 3) | ((uint8_t)(table & 0b1) << 2) | ((uint8_t)(rpl & 0b11)))
 #define GDT_ACCESS_ACCESSED 0b00000001
 #define GDT_ACCESS_READWRITE 0b00000010

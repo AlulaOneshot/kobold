@@ -37,17 +37,22 @@ uacpi_status uacpi_kernel_get_rsdp(uacpi_phys_addr *out_rsdp_address) {
 }
 
 void *uacpi_kernel_map(uacpi_phys_addr addr, uacpi_size len) {
+    printf("Mapping physical address %p, len %lu\n", (void *)addr, len);
     uacpi_phys_addr aligned = ALIGN_DOWN(addr, PAGE_SIZE);
     len += addr - aligned;
     len = ALIGN_UP(len, PAGE_SIZE);
-    return (void *)((uint64_t)vmGetSpace(aligned, len / PAGE_SIZE) + (addr - aligned));
+    void *vaddr = (void *)((uint64_t)vmGetSpace(aligned, len / PAGE_SIZE) + (addr - aligned));
+    printf("Mapped to virtual address %p\n", vaddr);
+    return vaddr;
 }
 
 void uacpi_kernel_unmap(void *vaddr, uacpi_size len) {
+    printf("Unmapping virtual address %p, len %lu\n", vaddr, len);
     uint64_t aligned = ALIGN_DOWN((uint64_t)vaddr, PAGE_SIZE);
     len += (uint64_t)vaddr - aligned;
     len = ALIGN_UP(len, PAGE_SIZE);
     vmFreeSpace((void *)aligned, len / PAGE_SIZE);
+    printf("Unmapped virtual address %p\n", vaddr);
 }
 
 void uacpi_kernel_log(uacpi_log_level level, const uacpi_char *msg) {
@@ -91,8 +96,8 @@ uacpi_status uacpi_kernel_pci_device_open(uacpi_pci_address address, uacpi_handl
 }
 
 void uacpi_kernel_pci_device_close(uacpi_handle handle) {
-    //TODO: Remove the device
-    // For now, we just ignore it.
+    removePCIDevice((pci_device_t *)handle);
+    free(handle);
 }
 
 uacpi_status uacpi_kernel_pci_read8(uacpi_handle handle, uacpi_size offset, uacpi_u8 *value) {
@@ -193,7 +198,10 @@ uacpi_status uacpi_kernel_io_write32(uacpi_handle handle, uacpi_size offset, uac
 }
 
 void *uacpi_kernel_alloc(uacpi_size size) {
-    return malloc(size);
+    printf("Allocating %lu bytes\n", size);
+    void *mem = malloc(size);
+    printf("Allocated at %p\n", mem);
+    return mem;
 }
 
 void uacpi_kernel_free(void *mem) {

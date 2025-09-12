@@ -348,6 +348,8 @@ void initialiseIDT() {
     // IRQs
     // TODO: Remap PIC
 
+    initPIC();
+
     setIDTGate(32, (uint64_t)isr32, makeSegmentSelector(1, 0, 0), IDT_IST_NO_IST, IDT_FLAG_TYPE_INTERRUPT | IDT_FLAG_DPL_0 | IDT_FLAG_PRESENT); // IRQ0 - Timer
     setIDTGate(33, (uint64_t)isr33, makeSegmentSelector(1, 0, 0), IDT_IST_NO_IST, IDT_FLAG_TYPE_INTERRUPT | IDT_FLAG_DPL_0 | IDT_FLAG_PRESENT); // IRQ1 - Keyboard
     setIDTGate(34, (uint64_t)isr34, makeSegmentSelector(1, 0, 0), IDT_IST_NO_IST, IDT_FLAG_TYPE_INTERRUPT | IDT_FLAG_DPL_0 | IDT_FLAG_PRESENT); // IRQ2 - Cascade (used internally by the two PICs. never raised)
@@ -579,6 +581,7 @@ void initialiseIDT() {
     }
 
     isr_handlers[32].handler = timerTick;
+    clearPICMask(0);
 
     idt_descriptor_t desc = {
         .offset = (uint64_t)&idt[0],
@@ -590,34 +593,6 @@ void initialiseIDT() {
 void commonISRHandler(isr_registers_t* regs) {
     isr_handlers[regs->interrupt].handler(regs);
 }
-
-#define PIC1		0x20		/* IO base address for master PIC */
-#define PIC2		0xA0		/* IO base address for slave PIC */
-#define PIC1_COMMAND	PIC1
-#define PIC1_DATA	(PIC1+1)
-#define PIC2_COMMAND	PIC2
-#define PIC2_DATA	(PIC2+1)
-
-#define ICW1_ICW4	0b1		/* Indicates that ICW4 will be present */
-#define ICW1_SINGLE	0b10		/* Single (cascade) mode */
-#define ICW1_INTERVAL4	0b100		/* Call address interval 4 (8) */
-#define ICW1_LEVEL	0b1000		/* Level triggered (edge) mode */
-#define ICW1_INIT	0b10000		/* Initialization - required! */
-
-#define ICW4_8086	0b1		/* 8086/88 (MCS-80/85) mode */
-#define ICW4_AUTO	0b10		/* Auto (normal) EOI */
-#define ICW4_BUF_SLAVE	0b1000		/* Buffered mode/slave */
-#define ICW4_BUF_MASTER	0b1100		/* Buffered mode/master */
-#define ICW4_SFNM	0b10000		/* Special fully nested (not) */
-
-#define CASCADE_IRQ 2
-
-void initPIC();
-void remapPIC(int offset1, int offset2);
-void disablePIC();
-void setPICMask(uint8_t line);
-void clearPICMask(uint8_t line);
-void sendEOI(uint8_t irq);
 
 void initPIC() {
     outb(PIC1_DATA, 0xFF); // Fully mask interrupts on both PICs

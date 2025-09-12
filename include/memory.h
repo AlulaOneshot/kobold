@@ -52,5 +52,6 @@ static inline slab_t *newSlab(slab_t *previous, uint16_t blockSize, uint16_t tot
     slab->memory = (void *)((uint64_t)virtual + sizeof(slab_t) + (totalBlocks / 8));
     slab->freeMap = (bitmap_t *)((uint64_t)virtual + sizeof(slab_t));
     memset(slab->freeMap, 0, totalBlocks / 8);
+    memset(slab->memory, 0, blockSize * totalBlocks);
     return slab;
 }

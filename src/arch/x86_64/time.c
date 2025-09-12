@@ -1,4 +1,5 @@
 #include <arch/x86_64/time.h>
+#include <arch/x86_64/cpu.h>
 
 uint64_t ticks = 0;
 
@@ -11,6 +12,7 @@ void initialiseTime() {
 
 void timerTick(isr_registers_t *regs) {
     ticks++;
+    sendEOI(0);
 }
 
 uint64_t getTime() {
